@@ -52,10 +52,10 @@
         "properties": ["beanType", "id", "method", "ref", "resultType", "scope", "trim", "validate"]
       }
     },
-    "4.22.0": {
-      "yamlSchemaArtifact": "org.apache.camel:camel-yaml-dsl:4.22.0!/schema/camelYamlDsl.json",
-      "yamlSchemaSha256": "sha256:6d21bc328f53168db47a51b31241da891f2d194849a0c06544f50dc67ea35186",
-      "catalogLanguagesArtifact": "org.apache.camel:camel-catalog:4.22.0!/org/apache/camel/catalog/languages.properties",
+    "4.22.1": {
+      "yamlSchemaArtifact": "org.apache.camel:camel-yaml-dsl:4.22.1!/schema/camelYamlDsl.json",
+      "yamlSchemaSha256": "sha256:d47d52c1ec671c9b463c1af751a7949bd8a92c651cd7ff406f318b13c29ba8fb",
+      "catalogLanguagesArtifact": "org.apache.camel:camel-catalog:4.22.1!/org/apache/camel/catalog/languages.properties",
       "catalogLanguagesSha256": "sha256:1ccbc99ba3d86c86b726e64be14aa6294a4643fca78479e12bb1cf7dde5d1da9",
       "yamlAliases": {
         "constant": "org.apache.camel.model.language.ConstantExpression",

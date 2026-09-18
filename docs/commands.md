@@ -33,7 +33,7 @@ retains its single CLI invocation with the supplied options.
 
 ## CLI Commands
 
-This guide describes Camel Kit `0.4.0`. The standalone CLI and the `0.4.0` Camel JBang plugin provide the equivalent `camel-kit` and `camel kit` command forms. Development continues at `0.4.1-SNAPSHOT`; see [installation](../README.md#installation) for release and development channels.
+This guide describes Camel Kit `0.4.1`. The standalone CLI and the `0.4.1` Camel JBang plugin provide the equivalent `camel-kit` and `camel kit` command forms. Development continues at `0.4.2-SNAPSHOT`; see [installation](../README.md#installation) for release and development channels.
 
 These commands are run in your terminal.
 
@@ -178,9 +178,9 @@ Any property from `distribution.properties` can be overridden at layers 2 or 3. 
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `camel.main.version` | `4.22.0` | Apache Camel version for Camel Main / JBang projects |
-| `camel.springboot.version` | `4.22.0` | Apache Camel version for Spring Boot projects |
-| `springboot.bom.version` | `4.22.0` | Spring Boot BOM version |
+| `camel.main.version` | `4.22.1` | Apache Camel version for Camel Main / JBang projects |
+| `camel.springboot.version` | `4.22.1` | Apache Camel version for Spring Boot projects |
+| `springboot.bom.version` | `4.22.1` | Spring Boot BOM version |
 | `camel.quarkus.version` | `4.18.3` | Apache Camel version for Quarkus projects |
 | `quarkus.platform.version` | `3.33.3.2` | Quarkus platform BOM version |
 | `camel.mcp.version` | See `distribution.properties` | Camel MCP server version |

@@ -97,7 +97,7 @@ class ShipExpressionPolicyConsistencyTest {
     void camel422JactlSelectorStaysVersionSpecific() throws Exception {
         JsonNode versions = resourceJson(INVENTORY).path("versions");
         JsonNode former = versions.path("4.18.4");
-        JsonNode current = versions.path("4.22.0");
+        JsonNode current = versions.path("4.22.1");
 
         assertFalse(former.path("yamlAliases").has("jactl"));
         assertFalse(textSet(former.path("catalogLanguages")).contains("jactl"));

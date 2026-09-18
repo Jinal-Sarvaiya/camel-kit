@@ -71,19 +71,19 @@ The optional Ship controller requires Linux and supports Camel Main projects wit
 
 ### Release channels
 
-This guide describes Camel Kit **0.4.0**, paired with Knowledge MCP **0.0.1**.
+This guide describes Camel Kit **0.4.1**, paired with Knowledge MCP **0.0.1**.
 Ship remains a **Technology Preview** and is not recommended for production use.
 
 | Channel | Install source | Version |
 |---------|----------------|---------|
-| Release | Tagged JBang catalog or Maven Central plugin | `0.4.0` |
-| Development | Default GitHub JBang catalog or a source build | `0.4.1-SNAPSHOT` |
+| Release | Tagged JBang catalog or Maven Central plugin | `0.4.1` |
+| Development | Default GitHub JBang catalog or a source build | `0.4.2-SNAPSHOT` |
 
 Both command surfaces provide `init`, `doctor`, `doc`, `graph`, `plan`, `nextId`, and `ship`,
 and all eight AI targets documented below. Pin the release when you need reproducible installation.
 The unqualified GitHub alias follows development; hosted snapshots are mutable and may lag `main`.
 
-### Install 0.4.0 (standalone JBang)
+### Install 0.4.1 (standalone JBang)
 
 ```bash
 # Install JBang (if not already installed)
@@ -91,33 +91,49 @@ curl -Ls https://sh.jbang.dev | bash -s - app setup        # Linux/macOS
 iex "& { $(iwr -useb https://ps.jbang.dev) } app setup"    # Windows PowerShell
 
 # Install the release globally
-jbang app install camel-kit@luigidemasi/camel-kit/camel-kit-0.4.0
+jbang app install camel-kit@luigidemasi/camel-kit/camel-kit-0.4.1
 
-# Verify: prints 0.4.0
+# Verify: prints 0.4.1
 camel-kit --version
 ```
 
-### Run 0.4.0 without installing
+### Run 0.4.1 without installing
 
 ```bash
-jbang run camel-kit@luigidemasi/camel-kit/camel-kit-0.4.0 init my-integration --ai claude
+jbang run camel-kit@luigidemasi/camel-kit/camel-kit-0.4.1 init my-integration --ai claude
 ```
 
-### Install 0.4.0 (Camel JBang plugin)
+### Install 0.4.1 (Camel JBang plugin)
 
 If you already use [Camel JBang](https://camel.apache.org/manual/camel-jbang.html), install Camel Kit as a plugin:
 
 ```bash
 camel plugin add kit \
-  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.0 \
+  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.1 \
   --description "Design Apache Camel Integrations with AI"
 
 camel kit init my-integration --ai claude
 ```
 
-To upgrade from `0.3.1`, reinstall the plugin at `0.4.0`. The retired `bob` and `gemini`
+To upgrade from `0.3.1`, reinstall the plugin at `0.4.1`. The retired `bob` and `gemini`
 targets are replaced by `bob2` (the default) and `antigravity`; see the
 [migration instructions](docs/antigravity.md). Back up customized generated files before reinitializing with `--force`.
+
+### Upgrade from 0.4.0
+
+Camel Main, Camel Spring Boot, and Camel MCP now default to `4.22.1`; the supported
+older LTS patch remains `4.18.4`. Spring Boot uses `4.1.1`, matching the published Camel
+Spring Boot release. Quarkus retains its independently aligned platform versions.
+Forage has no published mapping for Camel `4.22.1`, so new projects use verified component
+configuration or declarative beans instead; the existing `4.22.0` to Forage `1.6.0` mapping remains.
+
+Version `0.4.1` updates shared generation and review guidance to prefer verified declarative
+bean construction after Forage and component configuration. Knowledge MCP remains at `0.0.1`.
+
+Reinstall the standalone CLI with `jbang app install --force camel-kit@luigidemasi/camel-kit/camel-kit-0.4.1`,
+or rerun the plugin installation above. To apply the updated guidance to an existing project,
+commit or back up customized generated files, then run `camel-kit init --here --ai <your-agent> --force`
+(or `camel kit init --here --ai <your-agent> --force`). This rewrites generated assets.
 
 ### Development snapshot
 
@@ -125,7 +141,7 @@ targets are replaced by `bob2` (the default) and `antigravity`; see the
 jbang app install --force camel-kit@luigidemasi/camel-kit
 ```
 
-This installs the latest deployed `0.4.1-SNAPSHOT`. Build from source for a specific revision.
+This installs the latest deployed `0.4.2-SNAPSHOT`. Build from source for a specific revision.
 
 ### Build from Source (development version)
 
@@ -142,7 +158,7 @@ jbang app install --name camel-kit --force \
 
 # Or install the matching Camel plugin from the local Maven repository
 camel plugin add kit \
-  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.1-SNAPSHOT \
+  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.2-SNAPSHOT \
   --description "Design Apache Camel Integrations with AI"
 
 # Verify
@@ -161,7 +177,7 @@ cd camel-kit-knowledge
 
 ## Quick Start
 
-The examples below use the `0.4.0` release.
+The examples below use the `0.4.1` release.
 
 ```bash
 # 1. Create a new project (choose your AI assistant)

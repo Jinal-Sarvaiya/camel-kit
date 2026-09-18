@@ -11,22 +11,22 @@ A Camel JBang plugin that exposes Camel-Kit commands under `camel kit`.
 
 | Channel | Install source | Plugin surface |
 |---------|----------------|----------------|
-| Release `0.4.0` | Maven Central | `init`, `doctor`, `doc`, `graph`, `plan`, `nextId`, and `ship`; all eight supported agents |
-| Development `0.4.1-SNAPSHOT` | Source build and local Maven repository | `init`, `doctor`, `doc`, `graph`, `plan`, `nextId`, and `ship`; all eight current agents |
+| Release `0.4.1` | Maven Central | `init`, `doctor`, `doc`, `graph`, `plan`, `nextId`, and `ship`; all eight supported agents |
+| Development `0.4.2-SNAPSHOT` | Source build and local Maven repository | `init`, `doctor`, `doc`, `graph`, `plan`, `nextId`, and `ship`; all eight current agents |
 
-Pin `0.4.0` for a fixed release. Ship remains a **Technology Preview** and is not recommended for production use.
+Pin `0.4.1` for a fixed release. Ship remains a **Technology Preview** and is not recommended for production use.
 
-### Release 0.4.0
+### Release 0.4.1
 
 ```bash
 camel plugin add kit \
-  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.0 \
+  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.1 \
   --description "Design Apache Camel Integrations with AI"
 
 camel kit init my-integration --ai claude
 ```
 
-### Development 0.4.1-SNAPSHOT from Source
+### Development 0.4.2-SNAPSHOT from Source
 
 ```bash
 git clone https://github.com/luigidemasi/camel-kit.git
@@ -34,7 +34,7 @@ cd camel-kit
 ./mvnw clean install -DskipTests
 
 camel plugin add kit \
-  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.1-SNAPSHOT \
+  --gav io.github.luigidemasi:camel-jbang-plugin-kit:0.4.2-SNAPSHOT \
   --description "Design Apache Camel Integrations with AI"
 
 camel kit --help
@@ -55,7 +55,7 @@ camel kit init --here --ai codex
 camel kit doctor
 ```
 
-Release `0.4.0` supports `bob2`, `antigravity`, `claude`, `codex`, `copilot`, `pi`, `qwen`, and `opencode`.
+Release `0.4.1` supports `bob2`, `antigravity`, `claude`, `codex`, `copilot`, `pi`, `qwen`, and `opencode`.
 
 ## Commands
 

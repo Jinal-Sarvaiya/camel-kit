@@ -8,7 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-18
+
 ### Changed
+
+- Default Camel Main, Camel Spring Boot, and Camel MCP to `4.22.1`, with Spring Boot `4.1.1`.
+  Retain `4.18.4` as the supported older LTS patch and the existing Quarkus platform alignment.
+  Refresh Ship YAML-validator/Citrus compatibility and expression inventory for `4.22.1`.
+  Forage has no published `4.22.1` mapping, so new projects use component configuration or verified
+  declarative beans; retain the existing `4.22.0` / Forage `1.6.0` mapping for that runtime.
 
 - Prefer verified declarative bean construction over initialization scripts across shared generation and review
   workflows (#238). Preserve Forage/component configuration priority and allow scripts with a corroborated limitation;
@@ -568,7 +576,8 @@ Changes since 0.3.1. Ship remains a Technology Preview.
 - Heavily inspired by [GitHub Spec-Kit](https://github.com/github/spec-kit)
 - Built for the Apache Camel community
 
-[Unreleased]: https://github.com/luigidemasi/camel-kit/compare/camel-kit-0.4.0...HEAD
+[Unreleased]: https://github.com/luigidemasi/camel-kit/compare/camel-kit-0.4.1...HEAD
+[0.4.1]: https://github.com/luigidemasi/camel-kit/compare/camel-kit-0.4.0...camel-kit-0.4.1
 [0.4.0]: https://github.com/luigidemasi/camel-kit/compare/camel-kit-0.3.1...camel-kit-0.4.0
 [0.3.1]: https://github.com/luigidemasi/camel-kit/compare/camel-kit-0.3.0...camel-kit-0.3.1
 [0.3.0]: https://github.com/luigidemasi/camel-kit/compare/camel-kit-0.2.0...camel-kit-0.3.0
