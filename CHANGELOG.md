@@ -8,15 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.1] - 2026-09-18
+## [0.4.1] - 2026-09-21
 
 ### Changed
 
 - Default Camel Main, Camel Spring Boot, and Camel MCP to `4.22.1`, with Spring Boot `4.1.1`.
   Retain `4.18.4` as the supported older LTS patch and the existing Quarkus platform alignment.
   Refresh Ship YAML-validator/Citrus compatibility and expression inventory for `4.22.1`.
-  Forage has no published `4.22.1` mapping, so new projects use component configuration or verified
-  declarative beans; retain the existing `4.22.0` / Forage `1.6.0` mapping for that runtime.
+  Map Camel `4.22.1` to Forage `1.6.1`, including InfluxDB 1 and 2 client factories for Camel Main
+  and Spring Boot; retain the existing `4.22.0` / Forage `1.6.0` mapping for that runtime.
 
 - Prefer verified declarative bean construction over initialization scripts across shared generation and review
   workflows (#238). Preserve Forage/component configuration priority and allow scripts with a corroborated limitation;
