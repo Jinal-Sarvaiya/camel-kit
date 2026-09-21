@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Map Camel `4.22.1` to Forage `1.6.1`, including InfluxDB 1 and 2 client factories for Camel Main
   and Spring Boot; retain the existing `4.22.0` / Forage `1.6.0` mapping for that runtime.
 
+- Pin Knowledge MCP to `0.0.2`, aligning endpoint validation with Camel `4.22.1`
+  and accompanying the refreshed documentation index.
+
 - Prefer verified declarative bean construction over initialization scripts across shared generation and review
   workflows (#238). Preserve Forage/component configuration priority and allow scripts with a corroborated limitation;
   message transformations and DataMapper selection remain unchanged.

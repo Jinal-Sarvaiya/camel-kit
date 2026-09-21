@@ -71,7 +71,7 @@ The optional Ship controller requires Linux and supports Camel Main projects wit
 
 ### Release channels
 
-This guide describes Camel Kit **0.4.1**, paired with Knowledge MCP **0.0.1**.
+This guide describes Camel Kit **0.4.1**, paired with Knowledge MCP **0.0.2**.
 Ship remains a **Technology Preview** and is not recommended for production use.
 
 | Channel | Install source | Version |
@@ -128,7 +128,8 @@ Camel `4.22.1` maps to Forage `1.6.1`, including its InfluxDB 1 and 2 client fac
 Camel Main and Spring Boot. The existing `4.22.0` to Forage `1.6.0` mapping remains.
 
 Version `0.4.1` updates shared generation and review guidance to prefer verified declarative
-bean construction after Forage and component configuration. Knowledge MCP remains at `0.0.1`.
+bean construction after Forage and component configuration. Knowledge MCP `0.0.2` aligns endpoint validation
+with the Camel `4.22.1` catalog.
 
 Reinstall the standalone CLI with `jbang app install --force camel-kit@luigidemasi/camel-kit/camel-kit-0.4.1`,
 or rerun the plugin installation above. To apply the updated guidance to an existing project,

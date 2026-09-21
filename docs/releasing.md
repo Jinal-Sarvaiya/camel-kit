@@ -41,9 +41,8 @@ full reviewed commit SHA in `expected_sha`. It checks the tag and all reactor ve
 then runs the full build, signs artifacts and waits for Central publication. It does
 not create commits, move tags, merge branches, or create a GitHub release.
 
-For this release, keep Knowledge MCP at `0.0.1`; do not republish Knowledge or its index.
-Verify that the pinned `runner` artifact is available before publishing Camel Kit.
-When a future release changes the Knowledge pin, publish that Knowledge version first.
+Publish Knowledge MCP `0.0.2` and its refreshed index first. Verify that the pinned
+`runner` artifact is available before publishing Camel Kit.
 After publication, verify the tag-pinned JBang install and Camel JBang plugin from a clean cache.
 Create the GitHub release with reviewed changelog notes, `--verify-tag` and `--latest`.
 The unqualified JBang alias continues to follow the development branch.

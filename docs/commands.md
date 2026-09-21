@@ -184,7 +184,7 @@ Any property from `distribution.properties` can be overridden at layers 2 or 3. 
 | `camel.quarkus.version` | `4.18.3` | Apache Camel version for Quarkus projects |
 | `quarkus.platform.version` | `3.33.3.2` | Quarkus platform BOM version |
 | `camel.mcp.version` | See `distribution.properties` | Camel MCP server version |
-| `knowledge.mcp.version` | `0.0.1` | Knowledge MCP server version |
+| `knowledge.mcp.version` | `0.0.2` | Knowledge MCP server version |
 | `citrus.version` | `5.0.1` | Citrus test schema and dependency version |
 | `citrus.mcp.version` | `5.0.1` | Citrus MCP server artifact version |
 
