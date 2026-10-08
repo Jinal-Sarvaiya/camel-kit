@@ -24,7 +24,12 @@ state, candidates and published files behind one CLI invocation. Explain that th
 implementation-capable session and stop; only read-only `--status` is allowed. Do not change modes on the user's behalf.
 
 Use native execution only when the active Codex CLI session exposes the project custom agent `camel_ship_worker`,
-whose resolved `.codex/agents/camel-ship-worker.toml` has exactly `sandbox_mode = "read-only"` and no MCP servers.
+whose resolved `.codex/agents/camel-ship-worker.toml` has exactly `sandbox_mode = "read-only"` and no `[mcp_servers]`
+section, AND the effective child context enforces those restrictions for the active Codex CLI version. Verify that the
+child cannot execute commands, write files, call MCP tools, or inherit parent MCP servers or tools beyond read-only
+file access within the repository trust boundary. If the active Codex CLI version does not enforce `sandbox_mode` as an
+effective tool and write restriction on the child — or if enforcement cannot be verified — do not dispatch native work.
+Report that native Ship requires a Codex CLI version with verified child isolation and stop.
 The parent must already be authorized for the complete requested Ship workflow. Respect normal permission prompts,
 repository trust, sandbox and approval policies. Do not switch modes, change permissions, disable sandbox, add tools
 or use a broader worker.
@@ -32,9 +37,13 @@ or use a broader worker.
 When eligible and the user did not choose a backend, invoke `{COMMAND_PREFIX} ship --backend codex-native --json`,
 preserving every user-supplied Ship option as a separate safely quoted argument. Do not add an oversight policy or
 reinterpret positional text. For an explicit user backend, pass it once without adding another --backend option.
-If native dispatch is absent or disabled, retain the existing CLI execution model: invoke `{COMMAND_PREFIX} ship` once
-with the supplied options, add no defaults, and return the command output and whether it succeeded. This fallback still
-requires the parent to be authorized for the complete workflow.
+If the user explicitly chose `--backend codex-native` but native dispatch is unavailable or the child isolation check
+above failed, report that this session cannot service the requested native backend and stop without starting a run.
+Do not fall through to the CLI with an unsupported native backend.
+If native dispatch is absent or disabled and the user did not explicitly choose a native backend, retain the existing
+CLI execution model: invoke `{COMMAND_PREFIX} ship` once with the supplied options, add no defaults, and return the
+command output and whether it succeeded. This fallback still requires the parent to be authorized for the complete
+workflow.
 
 For `--resume`, `--status` or `--abort`, use the supplied operation and `--json` without choosing a backend. The run's
 persisted backend is authoritative. Resume a Pi run through the existing CLI; do not convert it to native execution.
