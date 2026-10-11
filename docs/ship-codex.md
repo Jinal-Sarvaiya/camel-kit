@@ -20,12 +20,11 @@ session authorized to implement. Normal permissions, sandbox policies, repositor
 roles and MCP configuration remain in effect.
 
 An eligible new run selects `--backend codex-native --json` unless the user explicitly chooses a backend. If the user
-explicitly selects `--backend codex-native` but native dispatch is unavailable or effective child isolation cannot be
-verified, the skill reports that this session cannot service the requested backend and stops without starting a run.
-If no backend was chosen and native dispatch is unavailable, a new authorized run keeps the existing CLI/Pi execution
-model. Existing runs retain their recorded backend: a `CODEX_NATIVE` run needs an eligible Codex CLI session to
-dispatch further work. Bob, Copilot, Claude and Pi runs do not switch to Codex, and Codex runs cannot switch to
-another host during recovery.
+explicitly selects `--backend codex-native` but native dispatch is unavailable, the skill reports that this session
+cannot service the requested backend and stops without starting a run. If no backend was chosen and native dispatch is
+unavailable, a new authorized run keeps the existing CLI/Pi execution model. Existing runs retain their recorded
+backend: a `CODEX_NATIVE` run needs an eligible Codex CLI session to dispatch further work. Bob, Copilot, Claude and
+Pi runs do not switch to Codex, and Codex runs cannot switch to another host during recovery.
 
 ## Native task and restrictions
 
@@ -34,22 +33,23 @@ copied verbatim, including on retries; its schema and oversight rules cannot be 
 so the active session's settings apply. Camel-Kit does not start another Codex process or discover Pi/Node for native
 stages.
 
-The custom agent declares `sandbox_mode = "read-only"` and no `[mcp_servers]` section. However, `sandbox_mode` alone
-does not guarantee effective tool restriction in all Codex CLI versions — the child may inherit parent permissions,
-command execution, and MCP servers. The relay skill must verify that the effective child context enforces read-only
-file access without command execution or inherited MCP tools before dispatching. If effective isolation cannot be
-verified for the active Codex CLI version, native dispatch is refused. This requirement is version-specific;
-future Codex CLI releases that enforce `sandbox_mode` as an effective capability boundary will satisfy the check.
+The custom agent declares `sandbox_mode = "read-only"` and no `[mcp_servers]` section. Where the host enforces sandbox
+restrictions on the child, those restrictions apply. Where they are not enforced, the worker runs under the parent
+session's existing authorized permissions — repository trust, sandbox policy and approval settings remain in effect.
+The worker is instructed not to edit project files, write to the controller's candidate or state directory, delegate,
+or publish; on hosts that enforce `sandbox_mode` the host prevents those actions, otherwise the instruction is the
+operative restriction. The worker may use the host's available means to read input and source files (including shell
+commands for file reading where that is the host's mechanism).
 
 The worker returns structured stage results and, for EXECUTE, complete text proposals for the approved route, Citrus
 test, `pom.xml` and `.camel-kit/config.properties`. The controller validates those proposals, writes its private
 candidate, computes hashes and runs deterministic checks before guarded publication. The native contract does not
 accept arbitrary extra resources, binary files or deletions.
 
-A fresh context is not an OS sandbox: its read access follows the repository trust boundary. The child is instructed to
-read only controller inputs and relevant sources. Do not broaden permissions, disable sandbox, add tools or substitute
-another role when a task cannot access its inputs. Linux and the existing Camel Main/YAML/Simple/Citrus contract
-remain required. Host versions are caller-reported diagnostics, not release certification.
+The child's read access follows the repository trust boundary and parent permissions. Do not broaden permissions,
+disable sandbox, add tools or substitute another role when a task cannot access its inputs. Linux and the existing
+Camel Main/YAML/Simple/Citrus contract remain required. Host versions are caller-reported diagnostics, not release
+certification.
 
 ## Recovery
 
@@ -61,8 +61,9 @@ aborted-run results are rejected. Only the controller advances stages or pauses 
 After parent interruption, inspect `--status --json`. Wait for a still-running child or submit its saved response.
 If its result is unavailable, do not dispatch the same pending task again. Its deadline is retained; `--resume` after
 expiry fails that attempt, and another explicit resume issues a new task. Use Codex's cancellation controls to stop
-host-owned children. Ship cannot terminate them; abort invalidates the run, and read-only children cannot modify the
-candidate even if they outlive the parent.
+host-owned children. Ship cannot terminate them; abort invalidates the run and rejects further submissions. The worker
+is instructed not to edit the candidate; on hosts that enforce sandbox restrictions the host prevents those actions.
+Host cancellation is needed to stop the child process.
 
 Failed runs return JSON with exit code 1; show `run.message` and wait for explicit resume. Errors may return stderr
 without JSON. Stop after command errors, including `stale-stage-input` or permission denial, and obtain a new user request

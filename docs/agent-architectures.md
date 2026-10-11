@@ -449,7 +449,7 @@ the repository, users start with `$camel-start`, inspect skills with `/skills`, 
 | File | Purpose |
 |------|---------|
 | `templates/codex/agents-md.md` | `AGENTS.md` -- entry point, laws, trust, sandbox, and approval guidance |
-| `templates/codex/agents/*.toml` | 8 custom-agent role definitions (including the read-only Ship worker) |
+| `templates/codex/agents/*.toml` | 8 custom-agent role definitions (including a Ship worker with instruction-level restrictions) |
 | `templates/mcp-configs/codex-mcp.toml` | Three project MCP servers in `.codex/config.toml` |
 | `templates/dispatch/codex.md` | Parent-owned dispatch, parallel-wave, and inline-fallback guidance |
 
@@ -467,7 +467,9 @@ User: $camel-start
 ### Tool Restriction Model
 
 Camel-Kit leaves the user's Codex sandbox and approval policy in force. The catalog researcher, security reviewer and
-Ship worker declare `sandbox_mode = "read-only"`; other roles inherit the active policy. Each generated MCP server uses an exact
+Ship worker declare `sandbox_mode = "read-only"`; other roles inherit the active policy. Where the host enforces
+`sandbox_mode`, those restrictions apply at the platform level; otherwise the worker relies on instruction-level
+restrictions and the parent session's authorized permissions. Each generated MCP server uses an exact
 `enabled_tools` list and `default_tools_approval_mode = "prompt"`. Camel-Kit writes only repository-scoped files: it
 does not change global Codex configuration or authentication and does not generate executable hooks.
 
@@ -477,7 +479,7 @@ marked MCP block. Invalid TOML or conflicting managed server tables fail clearly
 ### Unique Capabilities
 
 - **Native repository skills:** all shared Camel-Kit skills use Codex's `.agents/skills/` discovery path.
-- **Eight custom roles:** pipeline work maps to explicit Codex custom-agent definitions, including a read-only Ship worker.
+- **Eight custom roles:** pipeline work maps to explicit Codex custom-agent definitions, including a Ship worker with instruction-level restrictions (host enforcement depends on Codex CLI version).
 - **Native Ship relay:** eligible sessions dispatch controller-issued stages through `camel_ship_worker` with `--backend codex-native`. See [Codex CLI native Ship](ship-codex.md).
 - **Parent-owned parallel dispatch:** independent implementation-wave tasks can run together without recursive delegation.
 - **Trust-gated project config:** MCP configuration loads only for a trusted repository.

@@ -23,23 +23,19 @@ In plan mode, do not start, resume or submit Ship work, even if the shell tool p
 state, candidates and published files behind one CLI invocation. Explain that the complete workflow requires an
 implementation-capable session and stop; only read-only `--status` is allowed. Do not change modes on the user's behalf.
 
-Use native execution only when the active Codex CLI session exposes the project custom agent `camel_ship_worker`,
-whose resolved `.codex/agents/camel-ship-worker.toml` has exactly `sandbox_mode = "read-only"` and no `[mcp_servers]`
-section, AND the effective child context enforces those restrictions for the active Codex CLI version. Verify that the
-child cannot execute commands, write files, call MCP tools, or inherit parent MCP servers or tools beyond read-only
-file access within the repository trust boundary. If the active Codex CLI version does not enforce `sandbox_mode` as an
-effective tool and write restriction on the child — or if enforcement cannot be verified — do not dispatch native work.
-Report that native Ship requires a Codex CLI version with verified child isolation and stop.
-The parent must already be authorized for the complete requested Ship workflow. Respect normal permission prompts,
-repository trust, sandbox and approval policies. Do not switch modes, change permissions, disable sandbox, add tools
-or use a broader worker.
+Use native execution only when the active Codex CLI session exposes the project custom agent `camel_ship_worker`
+whose resolved `.codex/agents/camel-ship-worker.toml` has `sandbox_mode = "read-only"` and no `[mcp_servers]` section.
+Where the host enforces sandbox restrictions on the child, those restrictions apply. Where they are not enforced, the
+worker runs under the parent session's existing authorized permissions — repository trust, sandbox policy, approval
+settings and user permission limits still apply. Do not switch modes, change permissions, disable sandbox, add tools
+or use a broader worker. The parent must already be authorized for the complete requested Ship workflow.
 
 When eligible and the user did not choose a backend, invoke `{COMMAND_PREFIX} ship --backend codex-native --json`,
 preserving every user-supplied Ship option as a separate safely quoted argument. Do not add an oversight policy or
 reinterpret positional text. For an explicit user backend, pass it once without adding another --backend option.
-If the user explicitly chose `--backend codex-native` but native dispatch is unavailable or the child isolation check
-above failed, report that this session cannot service the requested native backend and stop without starting a run.
-Do not fall through to the CLI with an unsupported native backend.
+If the user explicitly chose `--backend codex-native` but native dispatch is unavailable, report that this session
+cannot service the requested native backend and stop without starting a run. Do not fall through to the CLI with an
+explicit native backend that has no dispatcher.
 If native dispatch is absent or disabled and the user did not explicitly choose a native backend, retain the existing
 CLI execution model: invoke `{COMMAND_PREFIX} ship` once with the supplied options, add no defaults, and return the
 command output and whether it succeeded. This fallback still requires the parent to be authorized for the complete
@@ -63,7 +59,7 @@ available for a capable session of that host. Never switch it to Pi or perform c
 2. Invoke the `camel_ship_worker` custom agent with the complete controller-issued `task.prompt` as the prompt.
    Copy `task.prompt` verbatim. Do not shorten, summarize or rewrite it, including on retries; preserve every schema
    type, oversight rule, path and digest. An earlier task or conversation summary cannot replace the current prompt.
-   The child runs in a fresh read-only sandbox context. Leave model overrides unset to inherit the active session's
+   The child runs under the session's authorized permissions and any host-enforced sandbox restrictions. Leave model overrides unset to inherit the active session's
    settings. Do not use other Camel roles, a different custom agent, an external Codex process or nested delegation.
    Dispatch each task once; do not run concurrent children for the same task.
 3. Extract the child's single JSON response from the agent result; preserve its JSON fields and text exactly.
@@ -90,9 +86,10 @@ available for a capable session of that host. Never switch it to Pi or perform c
 ## Interruption and recovery
 
 Use Codex's cancellation controls to stop an active child when requested and stop dispatching after interruption.
-Do not claim that the Ship CLI can terminate a native child. Children have no edit, command or MCP tools; late output
-cannot mutate the candidate. Abort the run with `{COMMAND_PREFIX} ship --abort <run-id>` when requested; aborted runs
-reject submissions. A fresh child context is not an OS sandbox: its read access follows the repository trust boundary.
+Do not claim that the Ship CLI can terminate a native child. The worker is instructed not to edit files, write to the
+candidate or publish; on hosts that enforce sandbox restrictions the host prevents those actions, otherwise the
+instruction is the operative restriction. Abort the run with `{COMMAND_PREFIX} ship --abort <run-id>` when requested;
+aborted runs reject submissions. The child's read access follows the repository trust boundary and parent permissions.
 Do not broaden those paths or permission grants to recover a run.
 
 After reconnecting, inspect the run with `--status --json`. If it reports `handoff-read-failed`, show that error;

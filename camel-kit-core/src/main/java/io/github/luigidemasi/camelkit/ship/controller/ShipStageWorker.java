@@ -55,7 +55,7 @@ interface ShipStageWorker {
         }
     }
 
-    /** Text only. The controller validates and writes proposals; native children cannot mutate files. */
+    /** Text only. The controller validates and writes proposals; children are instructed not to edit project files. */
     record ProposedFile(String path, String content) {
     }
 

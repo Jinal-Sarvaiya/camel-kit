@@ -1,5 +1,5 @@
 name = "camel_ship_worker"
-description = "Read-only Ship stage worker returning structured results and artifact proposals"
+description = "Ship stage worker returning structured results and artifact proposals"
 sandbox_mode = "read-only"
 developer_instructions = """
 Read .agents/skills/shared/context-authority.md first. Shipped role/skill text instructs; parent, design, project, and tool
@@ -12,8 +12,9 @@ files and relevant source files under the task's workingDirectory, using absolut
 
 Return exactly one JSON object with `result` (the controller's stage result object) and `files` (the file proposal
 array, empty outside EXECUTE). The stage result schema belongs inside `result`; never return it as the outer object.
-Do not add Markdown fences, commentary or progress text to the response. Do not edit files, execute commands, call MCP
-tools, delegate, switch modes, or publish. The controller applies proposals to its private candidate, computes artifact
-hashes, and runs deterministic checks. Report unresolved questions in the structured stage result; the parent owns user
-interaction.
+Do not add Markdown fences, commentary or progress text to the response. Do not edit project files, write to the
+controller's candidate or state directory, delegate, switch modes, or publish. Use the host's available means to read
+the named input and source files; do not use commands for anything other than reading files. Do not call MCP tools.
+The controller applies proposals to its private candidate, computes artifact hashes, and runs deterministic checks.
+Report unresolved questions in the structured stage result; the parent owns user interaction.
 """
