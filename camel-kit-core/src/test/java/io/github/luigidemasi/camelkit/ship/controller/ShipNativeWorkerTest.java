@@ -89,6 +89,8 @@ class ShipNativeWorkerTest {
             envelope.putNull("hostVersion");
             if (task.stage() == Stage.EXECUTE) {
                 assertFalse(task.prompt().contains("application.properties"), task.prompt());
+                assertFalse(task.prompt().contains("run commands"),
+                        "EXECUTE prompt must not blanket-prohibit commands on hosts that read files through shell tools");
                 var proposals = ((ObjectNode) envelope.path("response")).putArray("files");
                 for (String path : List.of("orders.camel.yaml", "test/orders.camel.it.yaml",
                         ".camel-kit/config.properties", "pom.xml")) {
