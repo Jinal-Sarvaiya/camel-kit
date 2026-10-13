@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   depends on the Codex CLI version. Fresh and regenerated workspaces receive the native skill and worker; runs retain
   their recorded host.
 
+### Changed
+
+- Move workflow examples and migration samples to the dedicated
+  [camel-kit-examples](https://github.com/luigidemasi/camel-kit-examples) repository.
+
 ## [0.4.1] - 2026-09-21
 
 ### Changed
