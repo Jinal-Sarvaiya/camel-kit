@@ -63,10 +63,12 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 |---|---|---|---|
 | **PassThruReceive** | Receive | No processing — direct `from(...).to(...)` | No transformation or validation. |
 | **PassThruTransmit** | Send | No processing — direct `from(...).to(...)` | |
-| **XMLReceive** | Receive | `from(...).to("validator:schema.xsd")` | Validates XML, no disassembly. |
+| **XMLReceive** | Receive | XML Disassembler: parse; split only if an envelope schema is used | No schema validation unless the receive location sets `ValidateDocument=True` (with `DocumentSpecNames`). Do not add `validator:` by default. |
 | **XMLTransmit** | Send | `marshal().jacksonXml()` | Serializes to XML. |
-| **BTSReceive2010** | Receive | XML Disassembler + Validator | Split + validate XML. |
+| **BTSReceive2010** | Receive | XML Disassembler + conditional Validator | Split XML. Validates only if the receive location sets `ValidateDocument=True`. |
 | **BTSTransmit2010** | Send | XML Assembler | Serialize to XML. |
+
+> **XMLReceive and validation:** The XMLReceive default pipeline contains Decode (empty), Disassemble (XML Disassembler), Validate (empty), and ResolveParty stages. The XML Disassembler does **not** validate by default — its `ValidateDocument` property defaults to `False`. Validation only occurs when the receive location's pipeline configuration sets `ValidateDocument=True` with a `DocumentSpecNames` value. Before adding a `validator:` step to a migrated route, check the source binding file (`*.xml`) for this setting. If it is not set, adding `validator:` is a **behaviour change** — files that BizTalk accepted will now be rejected. Add it only if the user explicitly asks, and record it in the design spec and `MIGRATION.md` notes as an addition, not as preserved BizTalk behaviour.
 
 ---
 
@@ -89,8 +91,9 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
           mimeMultipart: {}                # Decode stage
       - unmarshal:
           jacksonXml: {}                   # Disassemble stage
-      - to:
-          uri: "validator:schema.xsd"      # Validate stage
+      # Validate stage — only if ValidateDocument=True in the source binding
+      # - to:
+      #     uri: "validator:schema.xsd"
       - bean:
           ref: "partyResolver"             # ResolveParty stage
       - to:
@@ -130,7 +133,7 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 **BizTalk XML Disassembler:**
 - Parses envelope XML
 - Splits batched messages
-- Validates against schema (optional)
+- Validates against schema only if `ValidateDocument=True` in the receive location's pipeline configuration
 - Promotes distinguished fields
 
 **Camel Equivalent:**
@@ -140,8 +143,9 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
     steps:
       - unmarshal:
           jacksonXml: {}
-      - to:
-          uri: "validator:order-schema.xsd"
+      # Add validator only if ValidateDocument=True in the source binding
+      # - to:
+      #     uri: "validator:order-schema.xsd"
       - to:
           uri: "direct:process-order"
 ```
