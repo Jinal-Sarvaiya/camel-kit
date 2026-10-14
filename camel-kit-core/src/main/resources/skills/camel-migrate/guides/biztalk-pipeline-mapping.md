@@ -92,7 +92,7 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
       - unmarshal:
           mimeMultipart: {}                # Decode stage
       # Validate stage — run BEFORE unmarshal to validate source XML
-      # Include if: (a) ValidateDocument=True in .btp or binding, or
+      # Include if: (a) effective ValidateDocument=True after applying receive-location overrides, or
       #             (b) the Validate stage has a standalone XML Validator component
       # - to:
       #     uri: "validator:schema.xsd"
@@ -137,7 +137,7 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 **BizTalk XML Disassembler:**
 - Parses envelope XML
 - Splits batched messages
-- Validates against schema only if `ValidateDocument=True` in the `.btp` component configuration or the receive-location binding override
+- Validates against schema only if effective `ValidateDocument=True` after applying receive-location overrides (instance properties override pipeline properties; omitted properties inherit the pipeline configuration)
 - Promotes distinguished fields
 
 **Camel Equivalent:**
@@ -145,7 +145,7 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 - split:
     xpath: "//Order"
     steps:
-      # Add validator BEFORE unmarshal — only if ValidateDocument=True in .btp or binding
+      # Add validator BEFORE unmarshal — only if effective ValidateDocument=True after applying receive-location overrides
       # - to:
       #     uri: "validator:order-schema.xsd"
       - unmarshal:
