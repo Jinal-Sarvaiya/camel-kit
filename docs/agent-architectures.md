@@ -71,7 +71,7 @@ Claude's `Agent` tool dispatches subagents with isolated context windows. Each s
 
 | File | Purpose |
 |------|---------|
-| `templates/claude/claude-md.md` | `CLAUDE.md` -- project rules (iron laws, Camel version, command prefix, MCP setup) |
+| `templates/claude/claude-md.md` | `CLAUDE.md` -- imports `AGENTS.md` (shared routing, iron laws, command prefix, MCP setup) and constrains Ship to opt-in use |
 | `templates/claude/settings.json` | Claude Code project settings |
 | `templates/claude/camel-ship.md` | `.claude/skills/camel-ship/SKILL.md` -- native Ship relay skill (replaces the CLI delegate) |
 | `templates/claude/agents/camel-ship-worker.md` | `.claude/agents/camel-ship-worker.md` -- read-only Ship stage worker subagent (`tools: Read, Grep, Glob`) |
