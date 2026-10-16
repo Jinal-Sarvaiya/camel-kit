@@ -22,6 +22,24 @@ skill. Legacy command stubs remain installed for compatibility.
 4. Camel version: ONLY from `.camel-kit/config.properties`
 5. Run app after implementation; use `/camel-execute` for the structured verification loop and report
 
+## Camel 4.22 rules
+
+1. `onException`, `onCompletion`, `intercept*`, and `routeConfiguration` are **top-level items**, never `steps` entries. For route-scoped handling, use a `routeConfiguration` with an `id` and set `routeConfigurationId` on the route. `errorHandler` goes at the top level or as a route property.
+2. Write `handled`, `continued`, and constant values as expressions or strings. Write `redeliveryDelay`, `maximumRedeliveries`, and `delay` as strings, not YAML ints or booleans.
+3. Do not copy `camel validate` normalize output back over the route: in 4.22.1 it moves a top-level `onException` into `steps` (CAMEL-25490). *(Drop when targeting a version with the fix.)*
+4. Run `camel_validate_yaml_dsl` (or `camel validate yaml`) on the **final file**, after the last edit.
+5. Passing the schema check does not mean the route runs. Run the app with `camel run`, read the log, and exercise all endpoints before declaring the work done.
+6. `mail`: since 4.21, `useHeaderSubject`, `useHeaderFrom`, and `useHeaderRecipients` default to `false` — `Subject`/`From`/`To` headers are ignored. Set the option explicitly or put the value on the endpoint.
+7. Before every outbound `http` or `mail` producer, run `removeHeaders` (at minimum `CamelHttp*`, or `*` before mail). `bridgeEndpoint=true` does not stop the producer from appending `CamelHttpPath`.
+8. With `camel run`, `platform-http` needs **both** `camel.server.enabled=true` and `camel.server.port`. Without `camel.server.enabled` the port setting is ignored and the server binds to 8080.
+9. For third-party jars needed by `beans:`, add a `//DEPS group:artifact:version` line in a route file or use `--dep`. `camel.jbang.dependencies` in a properties file is silently ignored (CAMEL-25528). *(Drop when targeting a version with the fix.)*
+10. XPath namespaces in YAML: `namespace: [\{key: p, value: "uri"}]`. The YAML DSL can declare namespaces — do not replace them with `local-name()`.
+11. Use `optionsFilter` on catalog component calls. An empty result means no option matched the filter, not that the feature is unsupported.
+12. For the YAML shape of a construct, check `camel_catalog_examples` / `camel_catalog_example_file` before writing it.
+13. EIP doc names are camelCase model names (`wireTap-eip`, `recipientList-eip`, `onException-eip`). Kebab-case guesses return "not found".
+14. Put `redeliveryPolicy` on a specific `onException`, not on a route-wide `defaultErrorHandler`, which also retries 4xx/5xx.
+15. ActiveMQ manual ack: use `transacted=true`, or `acknowledgementModeName=CLIENT_ACKNOWLEDGE` together with transacted handling.
+
 ## CLI
 
 Use `{COMMAND_PREFIX}` for CLI commands (e.g., `{COMMAND_PREFIX} graph stats`).
