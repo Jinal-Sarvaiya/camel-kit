@@ -89,6 +89,7 @@ Analyse all BizTalk artifacts and build an orchestration/map/pipeline inventory.
 **For each BizTalk binding configuration, identify:**
 - Receive Port → Receive Pipeline mapping
 - Send Port → Send Pipeline mapping
+- Receive location pipeline configuration properties: `ValidateDocument` and `DocumentSpecNames` — check both the `.btp` pipeline component configuration and the receive-location binding override to determine the effective setting (these control whether the XML Disassembler validates; see `biztalk-pipeline-mapping.md`)
 - Adapter types and configuration (FILE, FTP, HTTP, MSMQ, SQL, WCF, etc.)
 
 **Classify each adapter/component using `biztalk-component-mapping.md`:**

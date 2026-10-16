@@ -63,10 +63,14 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 |---|---|---|---|
 | **PassThruReceive** | Receive | No processing — direct `from(...).to(...)` | No transformation or validation. |
 | **PassThruTransmit** | Send | No processing — direct `from(...).to(...)` | |
-| **XMLReceive** | Receive | `from(...).to("validator:schema.xsd")` | Validates XML, no disassembly. |
+| **XMLReceive** | Receive | XML Disassembler: parse; split only if an envelope schema is used | No schema validation unless the receive location sets `ValidateDocument=True` (with `DocumentSpecNames`). Do not add `validator:` by default. |
 | **XMLTransmit** | Send | `marshal().jacksonXml()` | Serializes to XML. |
-| **BTSReceive2010** | Receive | XML Disassembler + Validator | Split + validate XML. |
+| **BTSReceive2010** | Receive | XML Disassembler + conditional Validator | Parse XML; split only if an envelope schema is used. Disassembler validates only if `ValidateDocument=True`. If the Validate stage contains a standalone XML Validator component, always migrate that validation. |
 | **BTSTransmit2010** | Send | XML Assembler | Serialize to XML. |
+
+> **XMLReceive and validation:** The XMLReceive default pipeline contains Decode (empty), Disassemble (XML Disassembler), Validate (empty), and ResolveParty stages. The XML Disassembler does **not** validate by default — its `ValidateDocument` property defaults to `False`. Validation only occurs when the effective `ValidateDocument` setting is `True` with a `DocumentSpecNames` value. Check **both** the `.btp` pipeline component configuration and the receive-location binding override (`*.xml`) to determine the effective setting — the binding can override the `.btp` default. If neither sets it, adding `validator:` is a **behaviour change** — files that BizTalk accepted will now be rejected. In that case, do not add `validator:` automatically, but for **external-facing receive locations** (HTTP, FTP, file drops from untrusted sources), flag unvalidated XML as a security decision and require the user to confirm whether schema validation should be added. Record the decision in the design spec and `MIGRATION.md` notes — as an addition, not as preserved BizTalk behaviour.
+>
+> **Standalone XML Validator vs. XML Disassembler validation:** The `ValidateDocument` property controls only the XML Disassembler component. If the source pipeline's Validate stage contains a standalone **XML Validator** component, that validation is independent of `ValidateDocument` and must always be migrated. Do not make it conditional.
 
 ---
 
@@ -77,7 +81,7 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 **BizTalk Pipeline Stages:**
 1. Decode → MIME Decoder
 2. Disassemble → XML Disassembler
-3. Validate → XML Validator
+3. Validate → XML Validator (standalone component, independent of Disassembler's `ValidateDocument`)
 4. ResolveParty → Party Resolution
 
 **Camel Route Equivalent:**
@@ -87,10 +91,13 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
     steps:
       - unmarshal:
           mimeMultipart: {}                # Decode stage
+      # Validate stage — run BEFORE unmarshal to validate source XML
+      # Include if: (a) effective ValidateDocument=True after applying receive-location overrides, or
+      #             (b) the Validate stage has a standalone XML Validator component
+      # - to:
+      #     uri: "validator:schema.xsd"
       - unmarshal:
           jacksonXml: {}                   # Disassemble stage
-      - to:
-          uri: "validator:schema.xsd"      # Validate stage
       - bean:
           ref: "partyResolver"             # ResolveParty stage
       - to:
@@ -130,7 +137,7 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 **BizTalk XML Disassembler:**
 - Parses envelope XML
 - Splits batched messages
-- Validates against schema (optional)
+- Validates against schema only if effective `ValidateDocument=True` after applying receive-location overrides (instance properties override pipeline properties; omitted properties inherit the pipeline configuration)
 - Promotes distinguished fields
 
 **Camel Equivalent:**
@@ -138,10 +145,11 @@ BizTalk includes default pipelines for common scenarios. Map these to Camel patt
 - split:
     xpath: "//Order"
     steps:
+      # Add validator BEFORE unmarshal — only if effective ValidateDocument=True after applying receive-location overrides
+      # - to:
+      #     uri: "validator:order-schema.xsd"
       - unmarshal:
           jacksonXml: {}
-      - to:
-          uri: "validator:order-schema.xsd"
       - to:
           uri: "direct:process-order"
 ```
