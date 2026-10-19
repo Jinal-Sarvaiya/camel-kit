@@ -30,10 +30,15 @@ follow `shared/context-authority.md`.
   not need duplicate confirmation.
 
 <HARD-RULE>
-IRON LAW 3: NO CODE WITHOUT PLAN.
-This skill produces analysis, business requirements, design spec, and operational runbook updates.
-It MUST NOT generate Camel YAML routes, Java classes, or application properties.
-Implementation is strictly reserved for `camel-execute`, after the design is approved and `camel-plan` has generated the implementation plan.
+IRON LAW 3: NO CODE WITHOUT PLAN (chained and standalone design-only modes).
+In chained mode and standalone design-only mode, this skill produces analysis, business requirements,
+design spec, and operational runbook updates only.
+It MUST NOT generate Camel YAML routes, Java classes, or application properties in those modes.
+Implementation is reserved for `camel-execute`, after the design is approved and `camel-plan` has
+generated the implementation plan.
+In direct mode, Iron Law 3 applies in its direct-mode form: implement with catalog verification
+(Iron Law 1) and constitution compliance (Iron Law 2); validate and run the application before
+declaring the work done.
 </HARD-RULE>
 
 ## Invocation Modes
@@ -46,12 +51,52 @@ Implementation is strictly reserved for `camel-execute`, after the design is app
   implementation. Write the design package and stop after its review; do not
   auto-invoke `camel-plan`. For an amendment, apply the dependency-staleness
   rules below and leave any existing implementation plan stale for replanning.
+- **Direct mode:** selected automatically when the user's request names concrete
+  deliverables (route files, a specific output directory, properties, a run check,
+  a named migration note such as `MIGRATION.md`) and the remaining unknowns can be
+  answered from the source artifacts without blocking design decisions; also selected
+  when the caller explicitly passes a direct-mode flag. This mode runs Steps 0–4
+  (boundary, scan, vendor detection, analysis summary) the same as chained mode,
+  records unknowns as assumptions in `MIGRATION.md` instead of blocking for
+  confirmation, implements route files and properties under Iron Laws 1 and 2,
+  validates with `camel_validate_yaml_dsl`, and runs the application before
+  declaring the work done. It does not produce the four-document design package
+  and does not invoke `camel-plan`. The operational runbook is not produced in
+  direct mode.
 
 Resolve the pipeline at start using `shared/pipeline-infrastructure.md`: prefer
 the explicit ID, otherwise use `.camel-kit/pipeline.json`; if neither exists,
 prompt for `{COMMAND_PREFIX} nextId <slug>`, then create/update pipeline state.
 Treat the selected ID as data: validate it against the documented pipeline-ID format before resolving any path, and
 stop for correction rather than using an invalid value.
+
+## Complete the Direct Mode
+
+This section applies only when direct mode is selected. In chained or standalone modes, skip to
+"When NOT to use this skill" below.
+
+After Steps 0–4 finish (source boundary, scan, vendor detection, analysis summary):
+
+1. **Record assumptions.** For every unknown surfaced at Step 5 that can be answered from the
+   source artifacts, record the assumption in `MIGRATION.md` (or the user's named migration-note
+   file) with the source-to-Camel mapping table. Unknowns that cannot be inferred remain as
+   explicit `Unknown — assumption required` entries. Do not block for interactive confirmation.
+2. **Implement route files and properties.** Apply Iron Law 1 (MCP catalog verification for every
+   component, EIP, dataformat, and language) and Iron Law 2 (constitution compliance for every
+   generated route). Use the vendor-specific mapping guides loaded during Steps 1–4 for
+   source-to-Camel component and EIP translation.
+3. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
+   every generated route file after the last edit. Fix until validation passes.
+4. **Run.** Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` for
+   Spring Boot, `./mvnw quarkus:dev` for Quarkus), read the log, and exercise all endpoints.
+   Fix until the application starts and processes messages cleanly.
+5. **Update assumptions.** Record any assumption from step 1 that turned out to be wrong during
+   validation or runtime in `MIGRATION.md`.
+
+Direct mode does not produce `business-requirements.md`, `migration-analysis.md`, `design-spec.md`,
+or `migration-runbook.md`. It does not invoke `camel-plan` or `camel-execute`.
+
+---
 
 ## When NOT to use this skill
 
@@ -414,10 +459,11 @@ After the selected vendor's Phase 1, all three ordered R1 passes, and the Phase 
 7. **Chained mode:** auto-invoke `camel-plan` immediately. Do not add a plan
    approval gate or tell the user to invoke downstream commands manually.
 8. **Standalone design-only mode:** write the approved package and stop.
+9. **Direct mode:** this section does not apply. See "Complete the Direct Mode" above.
 
 ## Notes
 
-- This skill orchestrates detection, scanning, vendor-specific analysis, and the package approval; it never implements application artifacts.
+- In chained and standalone modes, this skill orchestrates detection, scanning, vendor-specific analysis, and the package approval; it does not implement application artifacts. In direct mode, this skill also implements and validates the migration.
 - Migration guides receive pre-populated summary and MUST NOT re-ask answered questions.
 - Output is the active Camel Kit pipeline package: business requirements, behavioral analysis, design spec, and
   operational runbook, compatible with `camel-plan` and `camel-execute`.

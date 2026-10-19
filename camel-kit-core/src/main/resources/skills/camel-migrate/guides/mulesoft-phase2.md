@@ -321,3 +321,26 @@ In chained mode, `camel-migrate` presents the design and, after approval,
 automatically hands off to `camel-plan`, `camel-execute`, and final
 `camel-validate`. In standalone mode, write the design package and stop. Do not
 instruct the user to invoke downstream commands manually.
+
+---
+
+### Direct Mode — Implementation and Validation
+
+This section applies only in `camel-migrate` direct mode. In chained or standalone modes, skip it.
+
+When direct mode is active, the Phase 2 guide produces implementation artifacts instead of the
+four-document design package. Use the source-to-Camel mapping table already built during
+Steps 2.1–2.3 as the implementation blueprint.
+
+1. **Implement routes.** For each MuleSoft flow, generate the corresponding Camel YAML route
+   file and `application.properties` entries. Apply Iron Law 1: verify every component, EIP,
+   and dataformat via MCP (`camel_catalog_component_doc`, `camel_catalog_eip_doc`) before
+   writing it. Apply Iron Law 2: ensure every generated route passes all 8 constitution rules.
+   Use `mule-component-mapping.md` and `mule-dataweave-conversion.md` for translation.
+2. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
+   every generated route file. Fix until validation passes.
+3. **Run.** Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` for
+   Spring Boot, `./mvnw quarkus:dev` for Quarkus), read the log, and exercise all endpoints.
+   Fix until the application starts and processes messages cleanly.
+4. **Record.** Write `MIGRATION.md` (or the user's named file) with the source-to-Camel mapping
+   table, all recorded assumptions, and any assumptions corrected during validation or runtime.

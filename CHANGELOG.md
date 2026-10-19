@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`camel-migrate` direct mode (#245)** — add a third invocation mode that implements routes
+  directly under Iron Laws 1 and 2 when the user's request names concrete deliverables. Scope
+  Iron Law 3 and the HARD-RULE block to chained/standalone modes. Add direct-mode implementation
+  sections to BizTalk, MuleSoft, and Camel version phase-2 guides.
 - Generated `CLAUDE.md` now imports `AGENTS.md` via `@AGENTS.md` directive so Claude Code loads routing rules and
   iron laws. `/camel-ship` is opt-in ("only when the user explicitly asks") instead of the default route.
   The same opt-in wording applies to the generated Copilot instructions (#244).
