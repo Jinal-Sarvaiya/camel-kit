@@ -346,14 +346,21 @@ Steps 2.1–2.2 as the implementation blueprint.
    root.
 2. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
    every generated route file. Fix until validation passes.
-3. **Run (requires explicit user authorization).** Before starting the application, obtain explicit
+3. **Adversarial review (inline).** Apply the Adversarial Code Review gate (Iron Law 5) to every
+   generated route against the Step 4 analysis summary and constitution rules. Run critic lanes
+   sequentially inline. If FAIL, return to step 1 for fix (max 3 cycles).
+4. **Run (requires explicit user authorization).** Before starting the application, obtain explicit
    user authorization — the generated routes may connect to live services and process real
    messages. When using a build wrapper (`./mvnw`, `./gradlew`), verify it belongs to the
    **target** project, not the source repository. Prefer `camel run` when the runtime is Main.
-   Start the application, read the log, and exercise endpoints only against test or sandbox
-   infrastructure confirmed by the user. Fix until the application starts cleanly.
-4. **Record.** Write `MIGRATION.md` (or the user's named file) with the source-to-Camel mapping
+   Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` or
+   `./gradlew bootRun` for Spring Boot, `./mvnw quarkus:dev` or `./gradlew quarkusDev` for
+   Quarkus), read the log, and exercise endpoints only against test or sandbox infrastructure
+   confirmed by the user. Apply a startup deadline: if the application does not reach a ready
+   state within 2 minutes, stop and report the failure rather than waiting indefinitely.
+5. **Record.** Write `MIGRATION.md` (or the user's named file) with the source-to-Camel mapping
    table, all recorded assumptions, and any assumptions corrected during validation or runtime.
-   Mark the migration as complete only after steps 2 and 3 both pass; if the session is
-   interrupted before both checks pass, the artifacts are unverified and `MIGRATION.md` must not
-   contain a completion marker.
+   Mark the migration as complete only after steps 2, 3, and 4 all pass; if the session is
+   interrupted before all checks pass, the artifacts are unverified and `MIGRATION.md` must not
+   contain a completion marker. When multiple migrations target the same project concurrently,
+   use distinct file names (e.g., `MIGRATION-mulesoft.md`) to avoid overwriting.

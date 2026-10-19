@@ -85,6 +85,8 @@ The pipeline is: Brainstorm (Design) → Plan → Execute → Validate.
 generate final routes or application code in chained or standalone modes. They generate business requirements and
 design specs. Implementation is reserved for the execution phase.
 In `camel-migrate` direct mode, implementation is part of the skill's own contract under Iron Laws 1 and 2.
+Direct mode applies Iron Law 5 (Adversarial Code Review) inline against the Step 4 analysis summary and
+constitution rules, since no design spec exists.
 
 ---
 

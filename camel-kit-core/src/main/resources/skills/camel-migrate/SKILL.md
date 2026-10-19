@@ -67,6 +67,11 @@ obtain explicit user authorization before running the application against live e
   design package, does not create or activate a pipeline ID, does not use the
   Guide Manifest, and does not invoke `camel-plan`.
 
+**Mode selection precedence:** If signals are ambiguous (e.g., a `PIPELINE_ID` is passed but the
+request also names concrete deliverables), apply this order: (1) an explicit `--direct` flag
+selects direct mode; (2) a `PIPELINE_ID` argument selects standalone; (3) concrete-deliverable
+detection selects direct; (4) otherwise chained mode is the default.
+
 In chained and standalone modes, resolve the pipeline at start using
 `shared/pipeline-infrastructure.md`: prefer the explicit ID, otherwise use
 `.camel-kit/pipeline.json`; if neither exists, prompt for
@@ -113,23 +118,37 @@ After Steps 0–4 finish (source boundary, scan, vendor detection, analysis summ
    generated route). Use the vendor-specific mapping guides loaded during Steps 1–4 for
    source-to-Camel component and EIP translation. Dispatch the vendor's Phase 2 guide in
    direct-mode context (the guide uses its "Direct Mode — Implementation and Validation" section
-   with the Step 4 analysis summary as input, not the full Phase 1/R1 document chain).
+   with the Step 4 analysis summary as input, not the full Phase 1/R1 document chain). The
+   output-path allowlist for the dispatch covers the target project's route files, properties,
+   and `MIGRATION.md` — not the design-package paths used by chained/standalone modes.
 
 5. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
    every generated route file after the last edit. Fix until validation passes.
 
-6. **Run (requires explicit user authorization).** Before starting the application, obtain
+6. **Adversarial review (inline).** Apply the Adversarial Code Review gate (Iron Law 5) to every
+   generated route. Since direct mode has no design spec, the ACR Moderator selects critic lanes
+   against the Step 4 analysis summary and constitution rules. Run lanes sequentially inline and
+   record that fresh-context isolation is unavailable. If FAIL, return to step 4 for fix (max 3
+   cycles). Proceed to step 7 only on PASS or PASS_WITH_TRADEOFFS.
+
+7. **Run (requires explicit user authorization).** Before starting the application, obtain
    explicit user authorization — the generated routes may connect to live services and process
    real messages once started. When using a build wrapper (`./mvnw`, `./gradlew`), verify it
    belongs to the **target** project, not the source repository — a malicious source can supply
    a modified wrapper that executes arbitrary code. Prefer `camel run` when the runtime is Main.
-   Start the application, read the log, and exercise endpoints only against test or sandbox
-   infrastructure confirmed by the user. Fix until the application starts cleanly.
+   Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` or
+   `./gradlew bootRun` for Spring Boot, `./mvnw quarkus:dev` or `./gradlew quarkusDev` for
+   Quarkus), read the log, and exercise endpoints only against test or sandbox infrastructure
+   confirmed by the user. Apply a startup deadline: if the application does not reach a ready
+   state within 2 minutes, stop and report the failure rather than waiting indefinitely.
 
-7. **Update assumptions and mark complete.** Record any assumption from step 2 that turned out to
+8. **Update assumptions and mark complete.** Record any assumption from step 2 that turned out to
    be wrong during validation or runtime in `MIGRATION.md`. Mark the migration as complete only
-   after steps 5 and 6 both pass. If the session is interrupted before both checks pass, the
+   after steps 5, 6, and 7 all pass. If the session is interrupted before all checks pass, the
    generated artifacts are unverified — `MIGRATION.md` must not contain a completion marker.
+   When multiple migrations run concurrently against the same project, use distinct
+   migration-note file names (e.g., `MIGRATION-biztalk.md`, `MIGRATION-mule.md`) to avoid
+   overwriting.
 
 Direct mode does not produce `business-requirements.md`, `migration-analysis.md`, `design-spec.md`,
 or `migration-runbook.md`. It does not create a pipeline ID, invoke `camel-plan`, `camel-execute`,
@@ -147,11 +166,12 @@ or use the Guide Manifest.
 ## Parameters
 
 ```
-/camel-migrate [PIPELINE_ID]
+/camel-migrate [PIPELINE_ID] [--direct]
 ```
 
-The optional pipeline ID selects standalone design-only mode. The command asks
-for the source-project path interactively.
+The optional pipeline ID selects standalone design-only mode. The `--direct` flag
+explicitly selects direct mode (see mode selection precedence above). The command
+asks for the source-project path interactively.
 
 ---
 
