@@ -37,8 +37,8 @@ It MUST NOT generate Camel YAML routes, Java classes, or application properties 
 Implementation is reserved for `camel-execute`, after the design is approved and `camel-plan` has
 generated the implementation plan.
 In direct mode, Iron Law 3 applies in its direct-mode form: implement with catalog verification
-(Iron Law 1) and constitution compliance (Iron Law 2); validate and run the application before
-declaring the work done.
+(Iron Law 1) and constitution compliance (Iron Law 2); validate with `camel_validate_yaml_dsl`;
+obtain explicit user authorization before running the application against live endpoints.
 </HARD-RULE>
 
 ## Invocation Modes
@@ -57,18 +57,24 @@ declaring the work done.
   answered from the source artifacts without blocking design decisions; also selected
   when the caller explicitly passes a direct-mode flag. This mode runs Steps 0–4
   (boundary, scan, vendor detection, analysis summary) the same as chained mode,
-  records unknowns as assumptions in `MIGRATION.md` instead of blocking for
-  confirmation, implements route files and properties under Iron Laws 1 and 2,
-  validates with `camel_validate_yaml_dsl`, and runs the application before
-  declaring the work done. It does not produce the four-document design package
-  and does not invoke `camel-plan`. The operational runbook is not produced in
-  direct mode.
+  then applies the runtime safety gate from Step 5. It reconciles the requested
+  Camel version and runtime with `.camel-kit/config.properties` before any catalog
+  call. Inferrable unknowns are recorded as assumptions in `MIGRATION.md`;
+  behavioral or runtime-compatibility unknowns still block for user input. It
+  implements route files and properties under Iron Laws 1 and 2, validates with
+  `camel_validate_yaml_dsl`, and obtains explicit user authorization before running
+  the application against live endpoints. It does not produce the four-document
+  design package, does not create or activate a pipeline ID, does not use the
+  Guide Manifest, and does not invoke `camel-plan`.
 
-Resolve the pipeline at start using `shared/pipeline-infrastructure.md`: prefer
-the explicit ID, otherwise use `.camel-kit/pipeline.json`; if neither exists,
-prompt for `{COMMAND_PREFIX} nextId <slug>`, then create/update pipeline state.
-Treat the selected ID as data: validate it against the documented pipeline-ID format before resolving any path, and
-stop for correction rather than using an invalid value.
+In chained and standalone modes, resolve the pipeline at start using
+`shared/pipeline-infrastructure.md`: prefer the explicit ID, otherwise use
+`.camel-kit/pipeline.json`; if neither exists, prompt for
+`{COMMAND_PREFIX} nextId <slug>`, then create/update pipeline state. Treat
+the selected ID as data: validate it against the documented pipeline-ID format
+before resolving any path, and stop for correction rather than using an invalid
+value. In direct mode, skip pipeline resolution entirely — no pipeline ID is
+created or activated, and no pipeline state is written.
 
 ## Complete the Direct Mode
 
@@ -77,24 +83,57 @@ This section applies only when direct mode is selected. In chained or standalone
 
 After Steps 0–4 finish (source boundary, scan, vendor detection, analysis summary):
 
-1. **Record assumptions.** For every unknown surfaced at Step 5 that can be answered from the
-   source artifacts, record the assumption in `MIGRATION.md` (or the user's named migration-note
-   file) with the source-to-Camel mapping table. Unknowns that cannot be inferred remain as
-   explicit `Unknown — assumption required` entries. Do not block for interactive confirmation.
-2. **Implement route files and properties.** Apply Iron Law 1 (MCP catalog verification for every
+0. **Reconcile target version.** If the user's request specifies a Camel version or runtime that
+   differs from `.camel-kit/config.properties`, persist the requested values before any catalog
+   call. If `config.properties` does not exist, prompt for the target version and runtime and
+   persist them. All subsequent MCP catalog verification uses the reconciled values.
+
+1. **Runtime safety gate.** Apply the same runtime safety gate as Step 5: classify every discovered
+   Java processor, bean, configuration class, Blueprint bean/service, and Maven plugin or
+   build/code-generation task as either fully translatable to supported YAML/inline Groovy or
+   retained Java/build logic. If any must be retained and Main is selected, stop and require the
+   user to choose Spring Boot or Quarkus before proceeding.
+
+2. **Record assumptions and block on behavioral unknowns.** For every unknown surfaced during
+   Steps 0–4 that can be answered from the source artifacts, record the assumption in
+   `MIGRATION.md` (or the user's named migration-note file) with the source-to-Camel mapping
+   table. Unknowns that affect behavioral correctness or runtime compatibility (authentication
+   mechanism, transaction semantics, message ordering guarantees, data-loss-sensitive error
+   handling) are **blocking** — stop and ask the user rather than assuming. Non-blocking unknowns
+   (property placeholder values, route descriptions, non-functional metadata) are recorded as
+   `Unknown — assumption required` entries.
+
+3. **Validate output paths.** Canonicalize every output path (route files, properties,
+   `MIGRATION.md`). Reject paths containing `..` traversal segments or symlinks that resolve
+   outside the project root. All generated artifacts must resolve within the approved target
+   project directory.
+
+4. **Implement route files and properties.** Apply Iron Law 1 (MCP catalog verification for every
    component, EIP, dataformat, and language) and Iron Law 2 (constitution compliance for every
    generated route). Use the vendor-specific mapping guides loaded during Steps 1–4 for
-   source-to-Camel component and EIP translation.
-3. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
+   source-to-Camel component and EIP translation. Dispatch the vendor's Phase 2 guide in
+   direct-mode context (the guide uses its "Direct Mode — Implementation and Validation" section
+   with the Step 4 analysis summary as input, not the full Phase 1/R1 document chain).
+
+5. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
    every generated route file after the last edit. Fix until validation passes.
-4. **Run.** Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` for
-   Spring Boot, `./mvnw quarkus:dev` for Quarkus), read the log, and exercise all endpoints.
-   Fix until the application starts and processes messages cleanly.
-5. **Update assumptions.** Record any assumption from step 1 that turned out to be wrong during
-   validation or runtime in `MIGRATION.md`.
+
+6. **Run (requires explicit user authorization).** Before starting the application, obtain
+   explicit user authorization — the generated routes may connect to live services and process
+   real messages once started. When using a build wrapper (`./mvnw`, `./gradlew`), verify it
+   belongs to the **target** project, not the source repository — a malicious source can supply
+   a modified wrapper that executes arbitrary code. Prefer `camel run` when the runtime is Main.
+   Start the application, read the log, and exercise endpoints only against test or sandbox
+   infrastructure confirmed by the user. Fix until the application starts cleanly.
+
+7. **Update assumptions and mark complete.** Record any assumption from step 2 that turned out to
+   be wrong during validation or runtime in `MIGRATION.md`. Mark the migration as complete only
+   after steps 5 and 6 both pass. If the session is interrupted before both checks pass, the
+   generated artifacts are unverified — `MIGRATION.md` must not contain a completion marker.
 
 Direct mode does not produce `business-requirements.md`, `migration-analysis.md`, `design-spec.md`,
-or `migration-runbook.md`. It does not invoke `camel-plan` or `camel-execute`.
+or `migration-runbook.md`. It does not create a pipeline ID, invoke `camel-plan`, `camel-execute`,
+or use the Guide Manifest.
 
 ---
 
@@ -251,6 +290,11 @@ Flows to migrate:    [N] flows detected with source→target mapping
 
 ## Step 5 — Confirm with User (conversational)
 
+> **Direct-mode exception:** Direct mode does not run Step 5's interactive confirmation flow.
+> Instead, it applies the runtime safety gate (see "Complete the Direct Mode" step 1), reconciles
+> the target version (step 0), and records remaining unknowns as assumptions — except behavioral
+> or runtime-compatibility unknowns, which still block for user input.
+
 Every question this skill or its guides put to the user, inline or relayed, uses the `[Concern N of M]` /
 `[Clarification N of M]` block from `camel-brainstorm/guides/migration-discovery.md`, one per message.
 
@@ -285,6 +329,12 @@ confirmed runtime with a hard-coded value.
 ---
 
 ## Guide Manifest
+
+> **Direct-mode exception:** Direct mode does not use the Guide Manifest. It does not dispatch
+> Phase 1, R1, or the full Phase 2 flow, and does not produce the four-document design package.
+> Instead, it dispatches only the vendor's Phase 2 guide in direct-mode context, which follows
+> its "Direct Mode — Implementation and Validation" section using the Step 4 analysis summary as
+> input. See "Complete the Direct Mode" above.
 
 After user confirms the analysis summary, dispatch the selected vendor's Phase 1, then R1 in this order: the behavioral
 risk pass, the source-retirement audit, and the deferred migration-strategy pass. Only then dispatch the selected

@@ -372,9 +372,14 @@ instruct the user to invoke downstream commands manually.
 
 This section applies only in `camel-migrate` direct mode. In chained or standalone modes, skip it.
 
+> **Prerequisite override:** In direct mode, the full Phase 1, R1, `business-requirements.md`, and
+> `migration-analysis.md` inputs are not available. Use the `camel-migrate` Step 4 analysis summary
+> as input instead. Skip Steps 2.3 (design spec update) and 2.4 (complete) — direct mode does not
+> write `business-requirements.md`, `migration-analysis.md`, or `design-spec.md`.
+
 When direct mode is active, the Phase 2 guide produces implementation artifacts instead of the
 four-document design package. Use the source-to-Camel mapping table already built during
-Steps 2.1–2.3 as the implementation blueprint.
+Steps 2.1–2.2 as the implementation blueprint.
 
 1. **Implement routes.** For each BizTalk orchestration, generate the corresponding Camel YAML
    route file and `application.properties` entries. Apply Iron Law 1: verify every component,
@@ -382,10 +387,18 @@ Steps 2.1–2.3 as the implementation blueprint.
    writing it. Apply Iron Law 2: ensure every generated route passes all 8 constitution rules.
    Use `biztalk-component-mapping.md`, `biztalk-expression-mapping.md`,
    `biztalk-pipeline-mapping.md`, and `biztalk-map-conversion.md` for translation.
+   Canonicalize every output path and reject traversal (`..`) or symlinks that escape the project
+   root.
 2. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
    every generated route file. Fix until validation passes.
-3. **Run.** Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` for
-   Spring Boot, `./mvnw quarkus:dev` for Quarkus), read the log, and exercise all endpoints.
-   Fix until the application starts and processes messages cleanly.
+3. **Run (requires explicit user authorization).** Before starting the application, obtain explicit
+   user authorization — the generated routes may connect to live services and process real
+   messages. When using a build wrapper (`./mvnw`, `./gradlew`), verify it belongs to the
+   **target** project, not the source repository. Prefer `camel run` when the runtime is Main.
+   Start the application, read the log, and exercise endpoints only against test or sandbox
+   infrastructure confirmed by the user. Fix until the application starts cleanly.
 4. **Record.** Write `MIGRATION.md` (or the user's named file) with the source-to-Camel mapping
    table, all recorded assumptions, and any assumptions corrected during validation or runtime.
+   Mark the migration as complete only after steps 2 and 3 both pass; if the session is
+   interrupted before both checks pass, the artifacts are unverified and `MIGRATION.md` must not
+   contain a completion marker.
