@@ -190,6 +190,32 @@ class DefaultGeneratorTest {
     }
 
     @Test
+    void directModeContractInGeneratedOutput() throws Exception {
+        for (String agentName : AgentRegistry.names()) {
+            Path projectDir = tempDir.resolve("direct-mode-" + agentName);
+            InitContext ctx = createContext(agentName, projectDir, "camel-kit");
+            AgentGeneratorFactory.create(agentName).generate(ctx);
+
+            Path agentsMd = ctx.projectDir().resolve("AGENTS.md");
+            String agentsContent = Files.readString(agentsMd);
+            assertTrue(agentsContent.contains("direct mode"),
+                    agentName + ": generated AGENTS.md Law 3 must reference direct-mode exception");
+
+            Path ironLaws = ctx.skillsDir().resolve("shared/iron-laws.md");
+            String lawsContent = Files.readString(ironLaws);
+            assertTrue(lawsContent.contains("direct mode"),
+                    agentName + ": installed iron-laws.md must scope Law 3 for direct mode");
+
+            Path migrateSkill = ctx.skillsDir().resolve("camel-migrate/SKILL.md");
+            String skillContent = Files.readString(migrateSkill);
+            assertTrue(skillContent.contains("If any must be retained and Main is selected, stop"),
+                    agentName + ": runtime safety gate must block retained Java/build logic with Main");
+            assertFalse(skillContent.contains("If none must be retained and Main is selected"),
+                    agentName + ": safety gate must require 'any', not 'none' — retained logic with Main must block");
+        }
+    }
+
+    @Test
     void appliesSkillLevelTraits() throws Exception {
         InitContext ctx = createContext("claude");
         new ClaudeGenerator().generate(ctx);

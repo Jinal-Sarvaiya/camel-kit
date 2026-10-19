@@ -76,7 +76,7 @@ retains the same CLI delegation contract. See [Bob setup](user-guide.md#bob-shel
 | `camel-brainstorm` | No | `camel-start` (greenfield) | Orchestrate design phase: interview user, produce the pipeline design spec |
 | `camel-plan` | No | `camel-brainstorm` (after design approval) | Produce detailed implementation plan from approved design spec |
 | `camel-execute` | No | `camel-plan` (auto-invoked after planning) | Environment probe, adversarial pre-filter, then ordered spec and quality review per task |
-| `camel-migrate` | No | `camel-start` (migration) | Vendor-aware risk, retirement, and safe-seam analysis plus design; hands an approved design to `camel-plan` |
+| `camel-migrate` | No | `camel-start` (migration) | Vendor-aware risk, retirement, and safe-seam analysis plus design; hands an approved design to `camel-plan`. In direct mode, implements route files under Iron Laws 1 and 2 with inline validation and user-authorized runtime check |
 | `camel-verify` | No | `camel-execute` (internal role: subagent where supported, inline otherwise) | 3-phase runtime verification loop (build, Citrus tests, report) — runs inside execute, not as a standalone pipeline stage |
 | `camel-ship` | No | -- (standalone CLI delegate) | **Technology Preview.** Forwards to the configured local Ship command; the controller owns stages, run state, and oversight |
 | `camel-design` | No | `camel-brainstorm` | Guides for component selection, EIP catalog, and flow design assembly |
@@ -254,9 +254,11 @@ runbook, without authorizing any of the runbook's operational actions.
 
 The execute phase starts with an **environment probe** that validates the target environment before dispatching implementers. If architectural failures are found, a **re-plan loop** modifies affected flow design sections and re-executes (max 3 rounds).
 
-Entry points diverge (`camel-brainstorm` for greenfield, `camel-migrate` for migration). Greenfield produces the active
-design spec; migration also produces business requirements and an evidence-qualified `migration-analysis.md` before its
-design spec, then registers `migration-runbook.md` as a direct child of that design. Migration strategy is classified
+Entry points diverge (`camel-brainstorm` for greenfield, `camel-migrate` for migration). In chained and standalone modes,
+migration produces business requirements, an evidence-qualified `migration-analysis.md`, the design spec, and a
+`migration-runbook.md` registered as a direct child of the design. In **direct mode** (`--direct` or auto-detected when
+the user names concrete deliverables), migration bypasses the design package, implements route files under Iron Laws 1
+and 2, validates, runs adversarial review, and starts the application with explicit user authorization. Migration strategy is classified
 per independently switchable scope as `Incremental candidate`, `Single cutover required`, or
 `Undetermined - evidence needed`, after every discovered ingress/root is reconciled into exactly one non-overlapping
 scope. Both pipelines converge on the same approved design-spec contract, so `camel-plan` and `camel-execute` work

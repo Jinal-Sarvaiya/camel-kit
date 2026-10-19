@@ -113,23 +113,32 @@ After Steps 0–4 finish (source boundary, scan, vendor detection, analysis summ
    outside the project root. All generated artifacts must resolve within the approved target
    project directory.
 
-4. **Implement route files and properties.** Apply Iron Law 1 (MCP catalog verification for every
-   component, EIP, dataformat, and language) and Iron Law 2 (constitution compliance for every
-   generated route). Use the vendor-specific mapping guides loaded during Steps 1–4 for
-   source-to-Camel component and EIP translation. Dispatch the vendor's Phase 2 guide in
-   direct-mode context (the guide uses its "Direct Mode — Implementation and Validation" section
-   with the Step 4 analysis summary as input, not the full Phase 1/R1 document chain). The
-   output-path allowlist for the dispatch covers the target project's route files, properties,
-   and `MIGRATION.md` — not the design-package paths used by chained/standalone modes.
+4. **Implement route files and properties.** Dispatch the vendor's Phase 2 guide in direct-mode
+   context. The guide uses its "Direct Mode — Implementation Only" section with the Step 4
+   analysis summary as input (not the full Phase 1/R1 document chain), produces implementation
+   artifacts (route YAML, properties, support files), and returns them to this parent
+   orchestrator. The parent owns all subsequent verification (steps 5–8); the Phase 2 guide
+   does not validate, run, or mark complete. Apply Iron Law 1 (MCP catalog verification for
+   every component, EIP, dataformat, and language) and Iron Law 2 (constitution compliance for
+   every generated route). Use the vendor-specific mapping guides loaded during Steps 1–4 for
+   source-to-Camel component and EIP translation. The output-path allowlist for the dispatch is
+   derived from the source inventory and selected runtime: route YAML files,
+   `application.properties`, `MIGRATION.md`, and any support artifacts the migration retains or
+   creates (XSLT stylesheets, Java processors/beans, and build files such as
+   `pom.xml`/`build.gradle` for added dependencies). Direct mode never hands off to
+   plan/execute, so these artifacts must be included here. The allowlist does not include the
+   design-package paths used by chained/standalone modes. All paths are subject to the
+   canonical-path validation in step 3.
 
 5. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
    every generated route file after the last edit. Fix until validation passes.
 
-6. **Adversarial review (inline).** Apply the Adversarial Code Review gate (Iron Law 5) to every
-   generated route. Since direct mode has no design spec, the ACR Moderator selects critic lanes
-   against the Step 4 analysis summary and constitution rules. Run lanes sequentially inline and
-   record that fresh-context isolation is unavailable. If FAIL, return to step 4 for fix (max 3
-   cycles). Proceed to step 7 only on PASS or PASS_WITH_TRADEOFFS.
+6. **Adversarial review.** Apply the Adversarial Code Review gate (Iron Law 5) to every generated
+   route. Since direct mode has no design spec, the ACR Moderator selects critic lanes against
+   the Step 4 analysis summary and constitution rules. Use fresh-context subagents when the
+   target supports them; otherwise run lanes sequentially inline and record that fresh-context
+   isolation is unavailable. If FAIL, return to step 4 for fix (max 3 cycles). Proceed to
+   step 7 only on PASS or PASS_WITH_TRADEOFFS.
 
 7. **Run (requires explicit user authorization).** Before starting the application, obtain
    explicit user authorization — the generated routes may connect to live services and process
@@ -140,7 +149,9 @@ After Steps 0–4 finish (source boundary, scan, vendor detection, analysis summ
    `./gradlew bootRun` for Spring Boot, `./mvnw quarkus:dev` or `./gradlew quarkusDev` for
    Quarkus), read the log, and exercise endpoints only against test or sandbox infrastructure
    confirmed by the user. Apply a startup deadline: if the application does not reach a ready
-   state within 2 minutes, stop and report the failure rather than waiting indefinitely.
+   state within 2 minutes, stop the process and report the failure rather than waiting
+   indefinitely. After verification completes (pass or fail), stop the application process
+   before proceeding.
 
 8. **Update assumptions and mark complete.** Record any assumption from step 2 that turned out to
    be wrong during validation or runtime in `MIGRATION.md`. Mark the migration as complete only
@@ -353,7 +364,7 @@ confirmed runtime with a hard-coded value.
 > **Direct-mode exception:** Direct mode does not use the Guide Manifest. It does not dispatch
 > Phase 1, R1, or the full Phase 2 flow, and does not produce the four-document design package.
 > Instead, it dispatches only the vendor's Phase 2 guide in direct-mode context, which follows
-> its "Direct Mode — Implementation and Validation" section using the Step 4 analysis summary as
+> its "Direct Mode — Implementation Only" section using the Step 4 analysis summary as
 > input. See "Complete the Direct Mode" above.
 
 After user confirms the analysis summary, dispatch the selected vendor's Phase 1, then R1 in this order: the behavioral

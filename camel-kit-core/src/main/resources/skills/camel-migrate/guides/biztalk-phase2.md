@@ -368,7 +368,7 @@ instruct the user to invoke downstream commands manually.
 
 ---
 
-### Direct Mode — Implementation and Validation
+### Direct Mode — Implementation Only
 
 This section applies only in `camel-migrate` direct mode. In chained or standalone modes, skip it.
 
@@ -377,35 +377,23 @@ This section applies only in `camel-migrate` direct mode. In chained or standalo
 > as input instead. Skip Steps 2.3 (design spec update) and 2.4 (complete) — direct mode does not
 > write `business-requirements.md`, `migration-analysis.md`, or `design-spec.md`.
 
-When direct mode is active, the Phase 2 guide produces implementation artifacts instead of the
-four-document design package. Use the source-to-Camel mapping table already built during
-Steps 2.1–2.2 as the implementation blueprint.
+When direct mode is active, the Phase 2 guide produces implementation artifacts and returns them
+to the `camel-migrate` parent for verification. The parent owns validation, adversarial review,
+runtime execution, and completion (SKILL.md steps 5–8). Do not duplicate those steps here.
 
-1. **Implement routes.** For each BizTalk orchestration, generate the corresponding Camel YAML
-   route file and `application.properties` entries. Apply Iron Law 1: verify every component,
-   EIP, and dataformat via MCP (`camel_catalog_component_doc`, `camel_catalog_eip_doc`) before
-   writing it. Apply Iron Law 2: ensure every generated route passes all 8 constitution rules.
-   Use `biztalk-component-mapping.md`, `biztalk-expression-mapping.md`,
+Use the source-to-Camel mapping table already built during Steps 2.1–2.2 as the implementation
+blueprint.
+
+1. **Implement routes and support artifacts.** For each BizTalk orchestration, generate the
+   corresponding Camel YAML route file and `application.properties` entries. Include any
+   required support artifacts (XSLT stylesheets, retained Java processors, build dependency
+   additions). Apply Iron Law 1: verify every component, EIP, and dataformat via MCP
+   (`camel_catalog_component_doc`, `camel_catalog_eip_doc`) before writing it. Apply Iron Law 2:
+   ensure every generated route passes all 8 constitution rules. Use
+   `biztalk-component-mapping.md`, `biztalk-expression-mapping.md`,
    `biztalk-pipeline-mapping.md`, and `biztalk-map-conversion.md` for translation.
-   Canonicalize every output path and reject traversal (`..`) or symlinks that escape the project
-   root.
-2. **Validate.** Run `camel_validate_yaml_dsl` (or `camel validate <route-file>.camel.yaml`) on
-   every generated route file. Fix until validation passes.
-3. **Adversarial review (inline).** Apply the Adversarial Code Review gate (Iron Law 5) to every
-   generated route against the Step 4 analysis summary and constitution rules. Run critic lanes
-   sequentially inline. If FAIL, return to step 1 for fix (max 3 cycles).
-4. **Run (requires explicit user authorization).** Before starting the application, obtain explicit
-   user authorization — the generated routes may connect to live services and process real
-   messages. When using a build wrapper (`./mvnw`, `./gradlew`), verify it belongs to the
-   **target** project, not the source repository. Prefer `camel run` when the runtime is Main.
-   Start the application (`camel run` for Camel Main, `./mvnw spring-boot:run` or
-   `./gradlew bootRun` for Spring Boot, `./mvnw quarkus:dev` or `./gradlew quarkusDev` for
-   Quarkus), read the log, and exercise endpoints only against test or sandbox infrastructure
-   confirmed by the user. Apply a startup deadline: if the application does not reach a ready
-   state within 2 minutes, stop and report the failure rather than waiting indefinitely.
-5. **Record.** Write `MIGRATION.md` (or the user's named file) with the source-to-Camel mapping
-   table, all recorded assumptions, and any assumptions corrected during validation or runtime.
-   Mark the migration as complete only after steps 2, 3, and 4 all pass; if the session is
-   interrupted before all checks pass, the artifacts are unverified and `MIGRATION.md` must not
-   contain a completion marker. When multiple migrations target the same project concurrently,
-   use distinct file names (e.g., `MIGRATION-biztalk.md`) to avoid overwriting.
+   Canonicalize every output path and reject traversal (`..`) or symlinks that escape the
+   project root.
+2. **Return artifacts.** Return the list of generated files and the source-to-Camel mapping table
+   to the parent orchestrator for verification. Do not validate, run, or mark complete — the
+   parent owns those steps.
