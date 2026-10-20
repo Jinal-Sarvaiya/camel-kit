@@ -264,6 +264,10 @@ class DefaultGeneratorTest {
                         "bob2: execute mode must grant subagent access");
                 assertTrue(executeMode.contains("camel-worker"),
                         "bob2: execute mode must allow camel-worker subagents");
+                assertTrue(executeMode.contains("active skill is /camel-execute"),
+                        "bob2: execute mode instructions must scope plan analysis to /camel-execute");
+                assertTrue(executeMode.contains("without plan analysis"),
+                        "bob2: execute mode instructions must exempt direct migration from plan analysis");
                 String brainstormMode = yamlModeBlock(modesContent, "camel-brainstorm-mode");
                 assertTrue(brainstormMode.contains("fileRegex"),
                         "bob2: brainstorm mode must restrict edit to design artifacts");
