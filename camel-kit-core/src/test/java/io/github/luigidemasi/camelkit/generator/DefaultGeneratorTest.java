@@ -212,6 +212,19 @@ class DefaultGeneratorTest {
                     agentName + ": runtime safety gate must block retained Java/build logic with Main");
             assertFalse(skillContent.contains("If none must be retained and Main is selected"),
                     agentName + ": safety gate must require 'any', not 'none' — retained logic with Main must block");
+
+            if (COPILOT.equals(agentName)) {
+                Path instructions = ctx.projectDir().resolve(".github/copilot-instructions.md");
+                String instructionsContent = Files.readString(instructions);
+                assertTrue(instructionsContent.contains("direct mode"),
+                        "copilot: primary copilot-instructions.md Law 3 must reference direct-mode exception");
+            }
+            if ("bob2".equals(agentName)) {
+                assertTrue(skillContent.contains("camel-execute-mode"),
+                        "bob2: migration trait must route direct mode to camel-execute-mode");
+                assertTrue(skillContent.contains("camel-brainstorm-mode"),
+                        "bob2: migration trait must route chained/standalone to camel-brainstorm-mode");
+            }
         }
     }
 

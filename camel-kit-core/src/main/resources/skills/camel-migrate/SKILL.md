@@ -150,8 +150,9 @@ After Steps 0–4 finish (source boundary, scan, vendor detection, analysis summ
    Quarkus), read the log, and exercise endpoints only against test or sandbox infrastructure
    confirmed by the user. Apply a startup deadline: if the application does not reach a ready
    state within 2 minutes, stop the process and report the failure rather than waiting
-   indefinitely. After verification completes (pass or fail), stop the application process
-   before proceeding.
+   indefinitely. Apply an endpoint-exercise deadline: if an exercised endpoint does not respond
+   within 30 seconds, record the timeout and proceed to cleanup rather than retrying.
+   After verification completes (pass or fail), stop the application process before proceeding.
 
 8. **Update assumptions and mark complete.** Record any assumption from step 2 that turned out to
    be wrong during validation or runtime in `MIGRATION.md`. Mark the migration as complete only
