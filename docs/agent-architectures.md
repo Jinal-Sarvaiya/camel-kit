@@ -165,7 +165,7 @@ Camel-Kit targets Antigravity 2.0 and its CLI using the native project customiza
 
 | Generated asset | Purpose |
 |---|---|
-| `AGENTS.md` | Skill routing, project rules, and CLI prefix |
+| `AGENTS.md` | Skill routing, project rules, Camel 4.22 YAML DSL rules, and CLI prefix |
 | `.agents/skills/` | Shared pipeline skills, guides, and Antigravity traits |
 | `.agents/agents/camel-worker.md` | Bounded implementation, testing, fixes, and verification |
 | `.agents/agents/camel-reviewer.md` | Research and review without native edit or shell tools |
@@ -291,7 +291,7 @@ questions, arguments, and phase handoffs. Users can also invoke bounded subagent
 
 | File | Purpose |
 |------|---------|
-| `templates/shared/agents-md.md` | Shared `AGENTS.md` bootstrap rendered by `AgentsMdGenerator` |
+| `templates/shared/agents-md.md` | Shared `AGENTS.md` bootstrap rendered by `AgentsMdGenerator` (includes Camel 4.22 YAML DSL rules) |
 | `templates/opencode/agents/*.md` | 9 agent definitions with per-type permissions and agent-owned step limits |
 | `templates/mcp-configs/opencode-mcp.json` | Supported MCP server fields plus top-level `ask` patterns for all three server tool namespaces |
 
@@ -399,7 +399,7 @@ Users start by asking Copilot to "Use the `/camel-start` skill." Run `/skills li
 | `templates/copilot/copilot-instructions.md` | `.github/copilot-instructions.md` -- project entry point, laws, MCP guidance, and safety policy |
 | `templates/copilot/agents/*.agent.md` | 7 custom agents with Copilot tool aliases and MCP server prefixes |
 | `templates/copilot/hooks/camel-kit-safety.json` | `preToolUse` hook that denies destructive or secret-sensitive shell commands |
-| `templates/copilot/agents-md.md` | `AGENTS.md` bridge for clients that also read root agent instructions |
+| `templates/copilot/agents-md.md` | `AGENTS.md` bridge with laws, Camel 4.22 rules, for clients that also read root agent instructions |
 | `templates/mcp-configs/copilot-mcp.json` | `.github/mcp.json` using Copilot's `tools` schema |
 | `templates/dispatch/copilot.md` | Shared dispatch block for Copilot skill copies |
 
@@ -448,7 +448,7 @@ the repository, users start with `$camel-start`, inspect skills with `/skills`, 
 
 | File | Purpose |
 |------|---------|
-| `templates/codex/agents-md.md` | `AGENTS.md` -- entry point, laws, trust, sandbox, and approval guidance |
+| `templates/codex/agents-md.md` | `AGENTS.md` -- entry point, laws, Camel 4.22 rules, trust, sandbox, and approval guidance |
 | `templates/codex/agents/*.toml` | 8 custom-agent role definitions (including a Ship worker with instruction-level restrictions) |
 | `templates/mcp-configs/codex-mcp.toml` | Three project MCP servers in `.codex/config.toml` |
 | `templates/dispatch/codex.md` | Parent-owned dispatch, parallel-wave, and inline-fallback guidance |
@@ -503,7 +503,7 @@ and bring the findings back to the main task.
 
 | File | Purpose |
 |------|---------|
-| `templates/pi/agents-md.md` | `AGENTS.md` -- Pi entry point, trust guidance, laws, and adapter setup |
+| `templates/pi/agents-md.md` | `AGENTS.md` -- Pi entry point, trust guidance, laws, Camel 4.22 rules, and adapter setup |
 | `templates/pi/extensions/camel-kit-guard.ts` | Static `tool_call` guard extension |
 | `templates/pi/extensions/camel-kit-guard-policy.json` | Declarative policy interpreted by the guard extension |
 | `templates/mcp-configs/pi-mcp.json` | `.mcp.json` for `pi-mcp-adapter` using `directTools` |
