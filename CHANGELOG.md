@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code native skill discovery (#243)** — skills are now installed to `.claude/skills/` with
+  `user-invocable` and `description` frontmatter so Claude Code discovers them natively without command stubs.
+  Legacy `.claude/commands/camel-*.md` stubs are cleaned up on regeneration; user-created commands are preserved.
+  Internal skills (`camel-design`, `camel-implement`, `camel-test`, `camel-verify`) are hidden from both user
+  invocation and model auto-selection. Doctor accepts legacy `.claude/commands` workspaces.
 - Generated `CLAUDE.md` now imports `AGENTS.md` via `@AGENTS.md` directive so Claude Code loads routing rules and
   iron laws. `/camel-ship` is opt-in ("only when the user explicitly asks") instead of the default route.
   The same opt-in wording applies to the generated Copilot instructions (#244).
