@@ -181,7 +181,25 @@ class DefaultGeneratorTest {
         assertTrue(content.contains("routeConfiguration"));
         assertTrue(content.contains("never `steps` entries"));
         assertTrue(content.contains("\"60000\""));
+        assertTrue(content.contains("not loaded as the project's own application or profile properties"));
+        assertTrue(content.contains("best-effort redelivery on failure"));
         assertTrue(content.contains("config.properties"));
+    }
+
+    @Test
+    void yamlDslRuleSemanticsInGeneratedOutput() throws Exception {
+        for (String agentName : AgentRegistry.names()) {
+            Path projectDir = tempDir.resolve("yaml-rules-" + agentName);
+            InitContext ctx = createContext(agentName, projectDir, "camel-kit");
+            AgentGeneratorFactory.create(agentName).generate(ctx);
+
+            Path agentsMd = ctx.projectDir().resolve("AGENTS.md");
+            String content = Files.readString(agentsMd);
+            assertTrue(content.contains("not loaded as the project's own application or profile properties"),
+                    agentName + ": Rule 9 must preserve 'not loaded as' to distinguish separately supplied files");
+            assertTrue(content.contains("best-effort redelivery on failure"),
+                    agentName + ": Rule 15 must qualify CLIENT_ACKNOWLEDGE redelivery as best-effort");
+        }
     }
 
     @Test
