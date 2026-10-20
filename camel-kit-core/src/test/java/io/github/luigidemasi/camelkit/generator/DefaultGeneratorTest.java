@@ -242,10 +242,38 @@ class DefaultGeneratorTest {
                         "copilot: primary copilot-instructions.md Law 3 must reference direct-mode exception");
             }
             if ("bob2".equals(agentName)) {
-                assertTrue(skillContent.contains("camel-execute-mode"),
-                        "bob2: migration trait must route direct mode to camel-execute-mode");
-                assertTrue(skillContent.contains("camel-brainstorm-mode"),
-                        "bob2: migration trait must route chained/standalone to camel-brainstorm-mode");
+                String traitSection = skillContent.substring(skillContent.indexOf("Agent Optimization"));
+                String[] traitParagraphs = traitSection.split("\n\n");
+
+                String chainedParagraph = findParagraph(traitParagraphs, "chained and standalone");
+                assertNotNull(chainedParagraph, "bob2: trait must have a chained/standalone paragraph");
+                assertTrue(chainedParagraph.contains("switch to `camel-brainstorm-mode`"),
+                        "bob2: chained/standalone must switch to camel-brainstorm-mode");
+
+                String directParagraph = findParagraph(traitParagraphs, "direct mode");
+                assertNotNull(directParagraph, "bob2: trait must have a direct-mode paragraph");
+                assertTrue(directParagraph.contains("switch to `camel-execute-mode`"),
+                        "bob2: direct mode must switch to camel-execute-mode");
+
+                Path modesFile = ctx.projectDir().resolve(".bob/custom_modes.yaml");
+                String modesContent = Files.readString(modesFile);
+                String executeMode = yamlModeBlock(modesContent, "camel-execute-mode");
+                assertTrue(executeMode.contains("- edit"),
+                        "bob2: execute mode must grant unrestricted edit for direct migration");
+                assertTrue(executeMode.contains("- subagent"),
+                        "bob2: execute mode must grant subagent access");
+                assertTrue(executeMode.contains("camel-worker"),
+                        "bob2: execute mode must allow camel-worker subagents");
+                String brainstormMode = yamlModeBlock(modesContent, "camel-brainstorm-mode");
+                assertTrue(brainstormMode.contains("fileRegex"),
+                        "bob2: brainstorm mode must restrict edit to design artifacts");
+
+                Path executeRule = ctx.projectDir().resolve(".bob/rules-camel-execute-mode/execute.md");
+                String ruleContent = Files.readString(executeRule);
+                assertTrue(ruleContent.contains("/camel-execute"),
+                        "bob2: execute mode rule must reference /camel-execute for plan-based orchestration");
+                assertTrue(ruleContent.contains("without plan analysis"),
+                        "bob2: execute mode rule must explicitly scope out plan analysis for direct migration");
             }
         }
     }
@@ -390,5 +418,23 @@ class DefaultGeneratorTest {
         List<String> values = new ArrayList<>();
         array.forEach(value -> values.add(value.asText()));
         return values;
+    }
+
+    private static String findParagraph(String[] paragraphs, String marker) {
+        for (String p : paragraphs) {
+            if (p.contains(marker)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private static String yamlModeBlock(String modes, String slug) {
+        int start = modes.indexOf("slug: " + slug);
+        if (start < 0) {
+            return "";
+        }
+        int next = modes.indexOf("\n  - slug:", start + 1);
+        return next < 0 ? modes.substring(start) : modes.substring(start, next);
     }
 }
