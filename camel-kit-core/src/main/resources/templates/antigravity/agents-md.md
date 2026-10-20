@@ -31,7 +31,7 @@ Internal libraries: `camel-design`, `camel-implement`, `camel-test`, `camel-veri
 12. For the YAML shape of a construct, check `camel_catalog_examples` / `camel_catalog_example_file` before writing it.
 13. EIP doc names are camelCase model names (`wireTap-eip`, `recipientList-eip`, `onException-eip`). Kebab-case guesses return "not found".
 14. Put `redeliveryPolicy` on a specific `onException`, not on a route-wide `defaultErrorHandler`, which also retries 4xx/5xx.
-15. ActiveMQ acknowledgment modes: use **either** `transacted=true` (transaction commit on success, rollback and redeliver on failure) **or** `acknowledgementModeName=CLIENT_ACKNOWLEDGE` (container acknowledges after successful listener execution, redelivers on failure) — not both, as a transacted session ignores the acknowledgment mode.
+15. ActiveMQ acknowledgment modes: use **either** `transacted=true` (transaction commit on success, rollback and redeliver on failure) **or** `acknowledgementModeName=CLIENT_ACKNOWLEDGE` (container acknowledges after successful listener execution, best-effort redelivery on failure) — not both, as a transacted session ignores the acknowledgment mode.
 
 ## Project resources
 
