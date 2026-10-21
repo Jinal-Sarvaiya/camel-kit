@@ -57,12 +57,16 @@ The 8 rules are absolute. They apply to every route, every time, regardless of c
 
 ---
 
-## Iron Law 3: No Code Without Design Approval and an Existing Plan
+## Iron Law 3: No Code Without Design Approval and an Existing Plan (chained and standalone modes)
 
 ```
 NEVER GENERATE IMPLEMENTATION ARTIFACTS BEFORE THE USER HAS APPROVED THE DESIGN SPEC
 AND A TASK-BASED IMPLEMENTATION PLAN HAS BEEN GENERATED.
 ```
+
+> **Direct-mode exception:** In `camel-migrate` direct mode, the user's request already contains
+> concrete deliverables and the skill implements under Iron Laws 1 and 2 with inline validation
+> and a runtime check. The full design→plan→execute pipeline is not required.
 
 The pipeline is: Brainstorm (Design) → Plan → Execute → Validate.
 1. **Understand:** Brainstorm produces a design spec. The user reviews and approves it.
@@ -77,9 +81,13 @@ The pipeline is: Brainstorm (Design) → Plan → Execute → Validate.
 4. EXECUTE phase (camel-execute) runs the actual code generation per task.
 5. VALIDATE phase (camel-validate) diagnoses and reports final quality findings without changing implementation artifacts.
 
-**NO "HELPFUL" CODE GEN:** Skills like `camel-migrate` or `camel-brainstorm` MUST NOT generate final routes or
-application code. They generate business requirements and design specs. Implementation is reserved for the execution
-phase.
+**NO "HELPFUL" CODE GEN (chained and standalone modes):** Skills like `camel-migrate` or `camel-brainstorm` MUST NOT
+generate final routes or application code in chained or standalone modes. They generate business requirements and
+design specs. Implementation is reserved for the execution phase.
+In `camel-migrate` direct mode, implementation is part of the skill's own contract under Iron Laws 1 and 2.
+Direct mode applies Iron Law 5 (Adversarial Code Review) against the Step 4 analysis summary and
+constitution rules, since no design spec exists. Use fresh-context subagents when supported;
+otherwise run lanes sequentially inline and record the missing isolation.
 
 ---
 

@@ -749,12 +749,14 @@ During execution, `/camel-execute` dispatches these internal skills as needed. T
 **When to use:** When you have an existing MuleSoft, Camel 2.x/3.x, JBoss Fuse, or BizTalk project to migrate.
 
 **Produces:** Business requirements, an evidence-qualified migration analysis, an active design spec, and an operational
-migration runbook tailored to the migration.
+migration runbook tailored to the migration. In **direct mode**, produces route files, properties, support artifacts,
+and a `MIGRATION.md` note instead of the four-document design package.
 
 **Example:**
 
 ```
 /camel-migrate
+/camel-migrate --direct
 ```
 
 **Supported source platforms:**
@@ -777,8 +779,12 @@ from a corroborated entry root; it is not proof that the source is dead or safe 
 
 **How it works:**
 
-This is the dedicated migration design orchestrator. It runs vendor-specific discovery and design with a shared
-behavioral analysis between them, then converges with the greenfield workflow after the complete package is approved:
+This is the dedicated migration orchestrator. In **chained** and **standalone** modes, it runs vendor-specific discovery
+and design with a shared behavioral analysis between them, then converges with the greenfield workflow after the
+complete package is approved. In **direct mode**, selected when the user's request names concrete deliverables or via
+`--direct`, it runs Steps 0–4 (scan, detect, analyze), then implements route files and properties under Iron Laws 1
+and 2, validates with `camel_validate_yaml_dsl`, runs adversarial review, and starts the application (with explicit
+user authorization) before declaring done. Direct mode does not produce the design package or invoke `camel-plan`:
 
 **Phase 1 -- Discovery and confirmation:**
 

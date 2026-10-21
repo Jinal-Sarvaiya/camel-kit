@@ -1,7 +1,11 @@
 # Execute Mode Rules
 
-- The parent Bob task is the orchestrator for `/camel-execute`.
+- The parent Bob task is the orchestrator for the active skill (`/camel-execute` or `/camel-migrate` direct mode).
 - The parent and every child read `.bob/skills/shared/context-authority.md` before any forwarded context.
+- When the active skill is `/camel-execute`, the parent coordinates plan-based wave orchestration: use `camel-kit plan analyze`
+  to identify waves and dispatch them in parallel. When the active skill is `/camel-migrate` in direct mode, the parent follows
+  the skill's own implementation/validation/ACR/run sequence without plan analysis — direct mode creates no design package or
+  implementation plan.
 - The parent coordinates separate fresh subagent calls for ACR Moderator Phase 1, selected critics, and Moderator Phase 2;
   each Moderator call is phase-limited because subagents cannot spawn subagents.
 - Use `spawn_subagent` with `name: "explore"` only for factual source search, inventory, and discovery.

@@ -321,3 +321,34 @@ In chained mode, `camel-migrate` presents the design and, after approval,
 automatically hands off to `camel-plan`, `camel-execute`, and final
 `camel-validate`. In standalone mode, write the design package and stop. Do not
 instruct the user to invoke downstream commands manually.
+
+---
+
+### Direct Mode — Implementation Only
+
+This section applies only in `camel-migrate` direct mode. In chained or standalone modes, skip it.
+
+> **Prerequisite override:** In direct mode, the full Phase 1, R1, `business-requirements.md`, and
+> `migration-analysis.md` inputs are not available. Use the `camel-migrate` Step 4 analysis summary
+> as input instead. Skip Steps 2.3 (design spec update) and 2.4 (complete) — direct mode does not
+> write `business-requirements.md`, `migration-analysis.md`, or `design-spec.md`.
+
+When direct mode is active, the Phase 2 guide produces implementation artifacts and returns them
+to the `camel-migrate` parent for verification. The parent owns validation, adversarial review,
+runtime execution, and completion (SKILL.md steps 5–8). Do not duplicate those steps here.
+
+Use the source-to-Camel mapping table already built during Steps 2.1–2.2 as the implementation
+blueprint.
+
+1. **Implement routes and support artifacts.** For each MuleSoft flow, generate the corresponding
+   Camel YAML route file and `application.properties` entries. Include any required support
+   artifacts (XSLT stylesheets from DataWeave conversion, retained Java processors, build
+   dependency additions). Apply Iron Law 1: verify every component, EIP, and dataformat via MCP
+   (`camel_catalog_component_doc`, `camel_catalog_eip_doc`) before writing it. Apply Iron Law 2:
+   ensure every generated route passes all 8 constitution rules. Use
+   `mule-component-mapping.md` and `mule-dataweave-conversion.md` for translation.
+   Canonicalize every output path and reject traversal (`..`) or symlinks that escape the
+   project root.
+2. **Return artifacts.** Return the list of generated files and the source-to-Camel mapping table
+   to the parent orchestrator for verification. Do not validate, run, or mark complete — the
+   parent owns those steps.
